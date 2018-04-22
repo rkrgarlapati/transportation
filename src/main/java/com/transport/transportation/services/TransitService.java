@@ -2,7 +2,7 @@ package com.transport.transportation.services;
 
 import com.transport.transportation.entity.*;
 import com.transport.transportation.repository.InvoiceRepository;
-import com.transport.transportation.repository.TransportRequestRepository;
+import com.transport.transportation.repository.TransitRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,17 +14,17 @@ import java.util.List;
 import java.util.Optional;
 
 /*@RestController
-@RequestMapping("/transport")*/
-public class TransportRequestService {
+@RequestMapping("/transit")*/
+public class TransitService {
 
     @Autowired
-    private TransportRequestRepository transReqRepository;
+    private TransitRepository transitRepository;
 
     @Autowired
     private InvoiceRepository invoiceRepository;
 
     @PostMapping
-    public ResponseEntity<?> transportRequest(@RequestBody TransportRequest transReq) {
+    public ResponseEntity<?> transportRequest(@RequestBody TransitRequest transReq) {
 
         Destination dest = new Destination();
         dest.setDestinationid(transReq.getDestinationId());
@@ -41,7 +41,7 @@ public class TransportRequestService {
         user.setUserType(transReq.getUserType());
         transReq.setUser(user);
 
-        transReqRepository.save(transReq);
+        transitRepository.save(transReq);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -52,7 +52,7 @@ public class TransportRequestService {
 
         HttpStatus status;
 
-        int count = transReqRepository.changeRequestStatus(reqStatus, requestId);
+        int count = transitRepository.changeRequestStatus(reqStatus, requestId);
 
         if (count > 0) {
             if (reqStatus.equalsIgnoreCase("A")) {
@@ -70,13 +70,13 @@ public class TransportRequestService {
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<TransRequestCustom> viewRequestById(@PathVariable() Integer requestId) {
+    public ResponseEntity<TransitCustom> viewRequestById(@PathVariable() Integer requestId) {
 
-        Optional<TransportRequest> value = transReqRepository.findById(requestId);
+        Optional<TransitRequest> value = transitRepository.findById(requestId);
 
         if (value.isPresent()) {
-            TransportRequest transReq = value.get();
-            TransRequestCustom dest = copyRequest(transReq);
+            TransitRequest transReq = value.get();
+            TransitCustom dest = copyRequest(transReq);
             return new ResponseEntity<>(dest, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -84,15 +84,15 @@ public class TransportRequestService {
     }
 
     @GetMapping("/usertype/{usertype}")
-    public ResponseEntity<TransRequestCustom> viewRequestByUserType(@PathVariable String usertype) {
+    public ResponseEntity<TransitCustom> viewRequestByUserType(@PathVariable String usertype) {
 
         usertype = usertype.toUpperCase();
 
-        Optional<TransportRequest> value = transReqRepository.findAllByUserType(usertype);
+        Optional<TransitRequest> value = transitRepository.findAllByUserType(usertype);
 
         if (value.isPresent()) {
-            TransportRequest transReq = value.get();
-            TransRequestCustom dest = copyRequest(transReq);
+            TransitRequest transReq = value.get();
+            TransitCustom dest = copyRequest(transReq);
             return new ResponseEntity<>(dest, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -103,19 +103,19 @@ public class TransportRequestService {
     @GetMapping
     public ResponseEntity<?> viewAllRequests() {
 
-        Iterable<TransportRequest> allrequests = transReqRepository.findAll();
+        Iterable<TransitRequest> allrequests = transitRepository.findAll();
 
-        List<TransRequestCustom> allReq = new ArrayList<>();
+        List<TransitRequest> allReq = new ArrayList<>();
         allrequests.forEach(req -> {
-            TransRequestCustom dest = copyRequest(req);
+            TransitCustom dest = copyRequest(req);
             allReq.add(dest);
         });
 
         return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 
-    private TransRequestCustom copyRequest(TransportRequest transReq) {
-        TransRequestCustom dest = new TransRequestCustom();
+    private TransitCustom copyRequest(TransitRequest transReq) {
+        TransitCustom dest = new TransitCustom();
 
         BeanUtils.copyProperties(transReq, dest);
 

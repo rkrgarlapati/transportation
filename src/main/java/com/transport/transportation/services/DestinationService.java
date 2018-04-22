@@ -2,16 +2,13 @@ package com.transport.transportation.services;
 
 import com.transport.transportation.entity.Destination;
 import com.transport.transportation.entity.DestinationName;
-import com.transport.transportation.entity.Source;
 import com.transport.transportation.repository.DestinationRepository;
-import com.transport.transportation.repository.SourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/destination")
@@ -36,6 +33,14 @@ public class DestinationService {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PutMapping
+    public ResponseEntity<?> edit(@RequestBody Destination destination) {
+
+        destinationRepository.save(destination);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @GetMapping
     public ResponseEntity<Iterable<Destination>> getAll() {
         HttpStatus status;
@@ -49,5 +54,26 @@ public class DestinationService {
         }
 
         return new ResponseEntity<>(all, status);
+    }
+
+
+    @DeleteMapping("/{destinationid}")
+    public ResponseEntity<?> delete(@PathVariable Integer destinationid) {
+
+        destinationRepository.deleteById(destinationid);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/{destinationid}")
+    public ResponseEntity<?> getById(@PathVariable Integer destinationid) {
+
+        Optional<Destination> destination = destinationRepository.findById(destinationid);
+
+        if(destination.isPresent()) {
+            return new ResponseEntity<>(destination, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

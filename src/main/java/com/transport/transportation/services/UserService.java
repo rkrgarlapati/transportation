@@ -7,6 +7,8 @@ import com.transport.transportation.entity.CompanyAddress;
 import com.transport.transportation.entity.User;
 import com.transport.transportation.repository.CompanyAddressRepository;
 import com.transport.transportation.repository.UserRepository;
+import com.transport.transportation.utility.ForgotPasswordSendEmail;
+import com.transport.transportation.utility.SignUpSendEmail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,12 @@ public class UserService {
 
     private UserRepository userRepository;
     private CompanyAddressRepository addressRepository;
+
+    @Autowired
+    private ForgotPasswordSendEmail forgotEmail;
+
+    @Autowired
+    private SignUpSendEmail signUpEmail;
 
     @Autowired
     public UserService(UserRepository userRepository, CompanyAddressRepository addressRepository) {
@@ -38,11 +46,23 @@ public class UserService {
 
         HttpStatus status = HttpStatus.CREATED;
         CompanyAddress address = userTemp.getCompanyAddress();
-        User userDB = userRepository.save(userTemp);
+        User userToDB = userRepository.save(userTemp);
 
         if (address != null && user.getUserType().equalsIgnoreCase("COMPANY")) {
-            address.setUsername(userDB.getUsername());
+            address.setUsername(userToDB.getUsername());
             addressRepository.save(address);
+        }
+
+        Optional<User> userFromDB = userRepository.findById(user.getUsername());
+
+
+        if (userFromDB.isPresent()) {
+
+            User userDB = userFromDB.get();
+
+            new Thread(() -> {
+                signUpEmail.sendMail(userDB);
+            }).start();
         }
 
         return new ResponseEntity<>(status);
@@ -72,32 +92,18 @@ public class UserService {
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPassword validateUser) {
 
         HttpStatus status;
-        Optional<User> value = userRepository.findById(validateUser.getUsername());
+        User user = userRepository.findByEmail(validateUser.getEmail());
 
-        if (value.isPresent()) {
+        if (user != null) {
 
-            User user = value.get();
+            new Thread(() -> {
+                forgotEmail.sendMail(user.getPassword(), user.getFirstName(), validateUser.getEmail());
+            }).start();
 
-            boolean valid = true;
-
-            if ((user.getDob().compareTo(validateUser.getDob()) != 0) ||
-                    (!user.getFirstName().equalsIgnoreCase(validateUser.getFirstName())) ||
-                    (!user.getLastName().equalsIgnoreCase(validateUser.getLastName())) ||
-                    (!user.getEmail().equalsIgnoreCase(validateUser.getEmail())) ||
-                    (!user.getGender().equalsIgnoreCase(validateUser.getGender())) ||
-                    (!user.getMobile().equalsIgnoreCase(validateUser.getMobile()))) {
-                valid = false;
-            }
-
-            if (valid) {
-                status = HttpStatus.OK;
-            } else {
-                status = HttpStatus.BAD_REQUEST;
-            }
-
+            status = HttpStatus.OK;
 
         } else {
-            status = HttpStatus.BAD_REQUEST;
+            status = HttpStatus.NOT_FOUND;
         }
 
         return new ResponseEntity<>(status);

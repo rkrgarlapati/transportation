@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/source")
@@ -33,6 +34,13 @@ public class SourceService {
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+    @PutMapping
+    public ResponseEntity<?> edit(@RequestBody Source source) {
+
+        sourceRepository.save(source);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
     @GetMapping
     public ResponseEntity<List<Source>> getAll() {
@@ -50,4 +58,25 @@ public class SourceService {
 
         return new ResponseEntity<>(sourceList, status);
     }
+
+    @DeleteMapping("/{sourceid}")
+    public ResponseEntity<?> delete(@PathVariable Integer sourceid) {
+
+        sourceRepository.deleteById(sourceid);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/{sourceid}")
+    public ResponseEntity<?> getById(@PathVariable Integer sourceid) {
+
+        Optional<Source> source = sourceRepository.findById(sourceid);
+
+        if(source.isPresent()) {
+            return new ResponseEntity<>(source, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
