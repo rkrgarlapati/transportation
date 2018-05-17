@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/source")
-public class SourceService {
+@RequestMapping("/taxi/source")
+public class TaxiSourceService {
 
     private SourceRepository sourceRepository;
 
     @Autowired
-    public SourceService(SourceRepository sourceRepository) {
+    public TaxiSourceService(SourceRepository sourceRepository) {
         this.sourceRepository = sourceRepository;
     }
 

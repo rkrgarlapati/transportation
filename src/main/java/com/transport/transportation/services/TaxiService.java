@@ -1,15 +1,22 @@
 package com.transport.transportation.services;
 
+import com.transport.transportation.common.CommonUtil;
+import com.transport.transportation.csv.GenerateCSV;
+import com.transport.transportation.dto.SendTransportDocument;
 import com.transport.transportation.entity.*;
+import com.transport.transportation.pdf.GeneratePDF;
 import com.transport.transportation.repository.InvoiceRepository;
-import com.transport.transportation.repository.TransportRequestRepository;
-import org.springframework.beans.BeanUtils;
+import com.transport.transportation.repository.TaxiRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,35 +25,65 @@ import java.util.Optional;
 public class TaxiService {
 
     @Autowired
-    private TransportRequestRepository transReqRepository;
+    private TaxiRequestRepository transReqRepository;
 
     @Autowired
     private InvoiceRepository invoiceRepository;
 
+    @Autowired
+    private CommonUtil commonUtil;
+
+    @Autowired
+    private GenerateCSV csv;
+
     @PostMapping
-    public ResponseEntity<?> transportRequest(@RequestBody TransportRequest transReq) {
+    public ResponseEntity<?> transportRequest(@RequestBody TransportRequestPost transRequest) {
+
+        TransportRequest transReq = new TransportRequest();
 
         Destination dest = new Destination();
-        dest.setDestinationid(transReq.getDestinationId());
+        dest.setDestinationid(transRequest.getDestinationId());
         transReq.setDest(dest);
 
         Source source = new Source();
-        source.setSourceid(transReq.getSourceId());
+        source.setSourceid(transRequest.getSourceId());
         transReq.setSour(source);
 
         transReq.setRequestStatus("P");
 
-        User user = new User();
-        user.setUsername(transReq.getUsername());
-        user.setUserType(transReq.getUserType());
+        SignUp user = new SignUp();
+        user.setEmail(transRequest.getEmail());
         transReq.setUser(user);
+        transReq.setUserType(transRequest.getUserType());
+
+        transReq.setRoundTrips(transRequest.getRoundTrips());
+        transReq.setMultipleTrips(transRequest.getMultipleTrips());
+        transReq.setCashInHand(transRequest.getCashInHand());
+        transReq.setDateTime(transRequest.getDateTime());
+        transReq.setMobileNo(transRequest.getMobileNo());
+        transReq.setCost(transRequest.getCost());
 
         transReqRepository.save(transReq);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @GetMapping("/{reqStatus}")
+    public ResponseEntity<Iterable<TransRequestCustom>> getAllByRequestStatus(@PathVariable String reqStatus) {
+
+        Iterable<TransportRequest> allrequests = transReqRepository.findAllByRequestStatus(reqStatus);
+
+        List<TransRequestCustom> allReq = new ArrayList<>();
+        allrequests.forEach(req -> {
+            TransRequestCustom dest = commonUtil.copyRequest(req);
+            allReq.add(dest);
+        });
+
+        return new ResponseEntity<>(allReq, HttpStatus.OK);
+    }
+
     @PatchMapping("/{requestId}/{reqStatus}")
+    @Transactional
     public ResponseEntity<?> approveRequest(@PathVariable Integer requestId,
                                             @PathVariable String reqStatus) {
 
@@ -57,7 +94,7 @@ public class TaxiService {
         if (count > 0) {
             if (reqStatus.equalsIgnoreCase("A")) {
                 Invoice invoice = new Invoice();
-                invoice.setRequestId(requestId);
+                invoice.setRequestid(requestId);
 
                 invoiceRepository.save(invoice);
             }
@@ -69,14 +106,14 @@ public class TaxiService {
         return new ResponseEntity<>(status);
     }
 
-    @GetMapping("/{requestId}")
+    @GetMapping("/request/{requestId}")
     public ResponseEntity<TransRequestCustom> viewRequestById(@PathVariable() Integer requestId) {
 
         Optional<TransportRequest> value = transReqRepository.findById(requestId);
 
         if (value.isPresent()) {
             TransportRequest transReq = value.get();
-            TransRequestCustom dest = copyRequest(transReq);
+            TransRequestCustom dest = commonUtil.copyRequest(transReq);
             return new ResponseEntity<>(dest, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -84,19 +121,19 @@ public class TaxiService {
     }
 
     @GetMapping("/usertype/{usertype}")
-    public ResponseEntity<TransRequestCustom> viewRequestByUserType(@PathVariable String usertype) {
+    public ResponseEntity<Iterable<TransRequestCustom>> viewRequestByUserType(@PathVariable String usertype) {
 
         usertype = usertype.toUpperCase();
 
-        Optional<TransportRequest> value = transReqRepository.findAllByUserType(usertype);
+        Iterable<TransportRequest> allrequests = transReqRepository.findAllByUserType(usertype);
 
-        if (value.isPresent()) {
-            TransportRequest transReq = value.get();
-            TransRequestCustom dest = copyRequest(transReq);
-            return new ResponseEntity<>(dest, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        List<TransRequestCustom> allReq = new ArrayList<>();
+        allrequests.forEach(req -> {
+            TransRequestCustom dest = commonUtil.copyRequest(req);
+            allReq.add(dest);
+        });
+
+        return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 
 
@@ -107,26 +144,47 @@ public class TaxiService {
 
         List<TransRequestCustom> allReq = new ArrayList<>();
         allrequests.forEach(req -> {
-            TransRequestCustom dest = copyRequest(req);
+            TransRequestCustom dest = commonUtil.copyRequest(req);
             allReq.add(dest);
         });
 
         return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 
-    private TransRequestCustom copyRequest(TransportRequest transReq) {
-        TransRequestCustom dest = new TransRequestCustom();
+    /*
+     *   dateformat : yyyy-MM-dd HH:mm:ss
+     */
+    @PostMapping("/report")
+    public ResponseEntity generateReport(@RequestBody SendTransportDocument pdfParam) {
 
-        BeanUtils.copyProperties(transReq, dest);
+        String usertype = pdfParam.getUsertype().toUpperCase();
+        HttpStatus status = null;
+        try {
+            String pattern = "yyyy-MM-dd HH:mm:ss";
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
 
-        dest.setDestination(transReq.getDest().getDestinationname());
-        dest.setSource(transReq.getSour().getSourcename());
-        dest.setSourceId(null);
-        dest.setDestinationId(null);
-        User user = transReq.getUser();
-        dest.setUserFullName(user.getFirstName().concat(" ").concat(user.getLastName()));
+            Date fromDate = null;
+            Date toDate = null;
 
-        return dest;
+            fromDate = simpleDateFormat.parse(pdfParam.getFromDate());
+            toDate = simpleDateFormat.parse(pdfParam.getToDate());
+
+            Iterable<TransportRequest> allrequests = transReqRepository.
+                    findAllByUserTypeAndDateTimeBetween(usertype, fromDate, toDate);
+
+            if (allrequests.spliterator().getExactSizeIfKnown() > 0) {
+                new Thread(() -> {
+                    csv.createCSV(pdfParam, allrequests);
+                }).start();
+                status = HttpStatus.OK;
+            } else {
+                status = HttpStatus.NOT_FOUND;
+            }
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity<>(status);
     }
-
 }

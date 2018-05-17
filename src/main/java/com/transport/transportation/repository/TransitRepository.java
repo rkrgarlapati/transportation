@@ -1,7 +1,6 @@
 package com.transport.transportation.repository;
 
 import com.transport.transportation.entity.TransitRequest;
-import com.transport.transportation.entity.TransportRequest;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

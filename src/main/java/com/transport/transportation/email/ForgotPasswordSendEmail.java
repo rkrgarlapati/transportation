@@ -1,6 +1,5 @@
-package com.transport.transportation.utility;
+package com.transport.transportation.email;
 
-import com.transport.transportation.entity.User;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -9,22 +8,16 @@ import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 
 @Service
-public class SignUpSendEmail {
+public class ForgotPasswordSendEmail {
 
     public static void main(String[] args) {
-        SignUpSendEmail mail = new SignUpSendEmail();
-        User user = new User();
-        user.setEmail("rkrgarlapati@gmail.com");
-        user.setFirstName("Ravi");
-        user.setUsername("rkrgarlapati");
-        user.setPassword("password");
-        mail.sendMail(user);
-        //mail.sendMail();
+        ForgotPasswordSendEmail mail = new ForgotPasswordSendEmail();
+        mail.sendMail("password", "rkrgarlapati@gmail.com");
     }
 
-    public void sendMail(User user) {
+    public void sendMail(String password, String toEmail) {
 
-        final String serverusername = "registermycredentials@gmail.com";
+        final String serverusername = "forgotmycredentials@gmail.com";
         final String serverpassword = "Password111!";
 
         Properties props = new Properties();
@@ -34,7 +27,7 @@ public class SignUpSendEmail {
         props.put("mail.smtp.port", "587");
 
         Session session = Session.getInstance(props,
-                new Authenticator() {
+                new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(serverusername, serverpassword);
                     }
@@ -44,17 +37,15 @@ public class SignUpSendEmail {
 
             Message message = new MimeMessage(session);
             message.setRecipients(Message.RecipientType.TO,
-                    InternetAddress.parse(user.getEmail()));
-            message.setSubject("Registration Successful!");
-            message.setText(" Dear " + user.getFirstName() + ","
-                    + "\n\n Your login credentials : "
-                    + "\n\n  LoginID    : " + user.getUsername()
-                    + "\n  Password : " + user.getPassword()
+                    InternetAddress.parse(toEmail));
+            message.setSubject("Forgot Password");
+            message.setText(" Hi,"
+                    + "\n\n Your login password : " + password
                     + "\n\n Regards.");
 
             Transport.send(message);
 
-            System.out.println("Registration Mail Sent");
+            System.out.println("Forgot Password Mail Sent");
 
         } catch (MessagingException e) {
             throw new RuntimeException(e);

@@ -2,7 +2,10 @@ package com.transport.transportation.services;
 
 import com.transport.transportation.entity.Destination;
 import com.transport.transportation.entity.DestinationName;
+import com.transport.transportation.entity.TransitDestination;
+import com.transport.transportation.entity.TransitDestinationName;
 import com.transport.transportation.repository.DestinationRepository;
+import com.transport.transportation.repository.TransitDestinationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,20 +14,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/destination")
-public class DestinationService {
+@RequestMapping("/transit/destination")
+public class TransitDestinationService {
 
-    private DestinationRepository destinationRepository;
+    private TransitDestinationRepository destinationRepository;
 
     @Autowired
-    public DestinationService(DestinationRepository destinationRepository) {
+    public TransitDestinationService(TransitDestinationRepository destinationRepository) {
         this.destinationRepository = destinationRepository;
     }
 
     @PostMapping
-    public ResponseEntity<?> add(@RequestBody DestinationName destinationName) {
+    public ResponseEntity<?> add(@RequestBody TransitDestinationName destinationName) {
 
-        Destination destination = new Destination();
+        TransitDestination destination = new TransitDestination();
         destination.setDestinationid(null);
         destination.setDestinationname(destinationName.getDestinationname());
 
@@ -34,7 +37,7 @@ public class DestinationService {
     }
 
     @PutMapping
-    public ResponseEntity<?> edit(@RequestBody Destination destination) {
+    public ResponseEntity<?> edit(@RequestBody TransitDestination destination) {
 
         destinationRepository.save(destination);
 
@@ -42,10 +45,10 @@ public class DestinationService {
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Destination>> getAll() {
+    public ResponseEntity<Iterable<TransitDestination>> getAll() {
         HttpStatus status;
 
-        Iterable<Destination> all = destinationRepository.findAll();
+        Iterable<TransitDestination> all = destinationRepository.findAll();
 
         if (all.spliterator().getExactSizeIfKnown() > 0) {
             status = HttpStatus.OK;
@@ -68,7 +71,7 @@ public class DestinationService {
     @GetMapping("/{destinationid}")
     public ResponseEntity<?> getById(@PathVariable Integer destinationid) {
 
-        Optional<Destination> destination = destinationRepository.findById(destinationid);
+        Optional<TransitDestination> destination = destinationRepository.findById(destinationid);
 
         if(destination.isPresent()) {
             return new ResponseEntity<>(destination, HttpStatus.OK);

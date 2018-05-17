@@ -11,11 +11,8 @@ public class Invoice {
     @Column(name = "invoiceid")
     private int invoiceid;
 
-    @Transient
-    TransportRequest request;
-
-    @Column(name = "requestId")
-    private int requestId;
+    @Column(name = "requestid")
+    private int requestid;
 
 
     public int getInvoiceid() {
@@ -26,19 +23,11 @@ public class Invoice {
         this.invoiceid = invoiceid;
     }
 
-    public TransportRequest getRequest() {
-        return request;
+    public int getRequestid() {
+        return requestid;
     }
 
-    public void setRequest(TransportRequest request) {
-        this.request = request;
-    }
-
-    public int getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(int requestId) {
-        this.requestId = requestId;
+    public void setRequestid(int requestid) {
+        this.requestid = requestid;
     }
 }

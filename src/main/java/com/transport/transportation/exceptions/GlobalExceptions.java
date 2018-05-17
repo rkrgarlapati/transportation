@@ -1,9 +1,6 @@
 package com.transport.transportation.exceptions;
 
-import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.hateoas.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -12,13 +9,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.context.request.WebRequest;
 
 import javax.persistence.RollbackException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import java.sql.SQLException;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 

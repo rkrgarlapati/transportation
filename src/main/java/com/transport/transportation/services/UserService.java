@@ -3,12 +3,11 @@ package com.transport.transportation.services;
 import com.transport.transportation.dto.ChangePassword;
 import com.transport.transportation.dto.ForgotPassword;
 import com.transport.transportation.dto.LoginUser;
-import com.transport.transportation.entity.CompanyAddress;
-import com.transport.transportation.entity.User;
+import com.transport.transportation.entity.SignUp;
 import com.transport.transportation.repository.CompanyAddressRepository;
-import com.transport.transportation.repository.UserRepository;
-import com.transport.transportation.utility.ForgotPasswordSendEmail;
-import com.transport.transportation.utility.SignUpSendEmail;
+import com.transport.transportation.repository.SignUpRepository;
+import com.transport.transportation.email.ForgotPasswordSendEmail;
+import com.transport.transportation.email.SignUpSendEmail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/user")
 public class UserService {
 
-    private UserRepository userRepository;
     private CompanyAddressRepository addressRepository;
+
+    @Autowired
+    private SignUpRepository signUpRepository;
 
     @Autowired
     private ForgotPasswordSendEmail forgotEmail;
@@ -31,14 +33,13 @@ public class UserService {
     private SignUpSendEmail signUpEmail;
 
     @Autowired
-    public UserService(UserRepository userRepository, CompanyAddressRepository addressRepository) {
-        this.userRepository = userRepository;
+    public UserService(CompanyAddressRepository addressRepository) {
         this.addressRepository = addressRepository;
     }
 
-    @Transactional
-    @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody User user) {
+    /*@Transactional
+    @PostMapping("/profile")
+    public ResponseEntity<?> profile(@RequestBody User user) {
 
         User userTemp = user;
         userTemp.setUserType(user.getUserType().toUpperCase());
@@ -53,12 +54,29 @@ public class UserService {
             addressRepository.save(address);
         }
 
-        Optional<User> userFromDB = userRepository.findById(user.getUsername());
+        return new ResponseEntity<>(status);
+    }*/
 
+    @Transactional
+    @PostMapping("/signup")
+    public ResponseEntity<?> signUp(@RequestBody SignUp sign) {
+
+        SignUp signUp = sign;
+        signUp.setUsertype(sign.getUsertype().toUpperCase());
+
+        HttpStatus status = HttpStatus.CREATED;
+
+        Random random = new Random();
+        String password = String.format("%04d", random.nextInt(10000));
+
+        signUp.setPassword(password);
+        signUpRepository.save(signUp);
+
+        Optional<SignUp> userFromDB = signUpRepository.findById(sign.getEmail());
 
         if (userFromDB.isPresent()) {
 
-            User userDB = userFromDB.get();
+            SignUp userDB = userFromDB.get();
 
             new Thread(() -> {
                 signUpEmail.sendMail(userDB);
@@ -71,18 +89,13 @@ public class UserService {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginUser loginUser) {
 
-        User user;
         HttpStatus status = HttpStatus.OK;
-        CompanyAddress address;
 
-        user = userRepository.findByUsernameAndPassword(
-                loginUser.getUsername(), loginUser.getPassword());
+        SignUp user = signUpRepository.findByEmailAndPassword(
+                loginUser.getEmail(), loginUser.getPassword());
 
         if (user == null) {
             status = HttpStatus.NOT_FOUND;
-        } else if (user.getUserType().equalsIgnoreCase("COMPANY")) {
-            address = addressRepository.findByUsername(user.getUsername());
-            user.setCompanyAddress(address);
         }
 
         return new ResponseEntity<>(user, status);
@@ -92,12 +105,12 @@ public class UserService {
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPassword validateUser) {
 
         HttpStatus status;
-        User user = userRepository.findByEmail(validateUser.getEmail());
+        SignUp user = signUpRepository.findByEmail(validateUser.getEmail());
 
         if (user != null) {
 
             new Thread(() -> {
-                forgotEmail.sendMail(user.getPassword(), user.getFirstName(), validateUser.getEmail());
+                forgotEmail.sendMail(user.getPassword(), validateUser.getEmail());
             }).start();
 
             status = HttpStatus.OK;
@@ -114,7 +127,7 @@ public class UserService {
     public ResponseEntity<?> changePassword(@RequestBody ChangePassword changePassword) {
 
         HttpStatus status;
-        int count = userRepository.updatePassword(changePassword.getNewpassword(),
+        int count = signUpRepository.updatePassword(changePassword.getNewpassword(),
                 changePassword.getPassword(), changePassword.getUsername());
 
         if (count > 0) {
@@ -125,8 +138,6 @@ public class UserService {
 
         return new ResponseEntity<>(status);
     }
-
-
 
     /*@GetMapping("/login/{username}/{password}")
     public ResponseEntity<?> login(@PathVariable String username,

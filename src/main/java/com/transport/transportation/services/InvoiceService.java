@@ -1,7 +1,6 @@
 package com.transport.transportation.services;
 
 import com.transport.transportation.entity.Invoice;
-import com.transport.transportation.entity.TransportRequest;
 import com.transport.transportation.repository.InvoiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

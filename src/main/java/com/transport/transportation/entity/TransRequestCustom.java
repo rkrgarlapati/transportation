@@ -3,7 +3,6 @@ package com.transport.transportation.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.transport.transportation.entity.TransportRequest;
 
 import javax.persistence.Transient;
 

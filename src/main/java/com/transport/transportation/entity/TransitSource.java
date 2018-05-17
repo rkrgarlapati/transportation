@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "SOURCE")
-public class Source extends  SourceName{
+@Table(name = "TRANSITSOURCE")
+public class TransitSource extends  SourceName{
 
     @Id
     @Column(name="SOURCEID")
@@ -24,6 +24,4 @@ public class Source extends  SourceName{
     public void setSourceid(Integer sourceid) {
         this.sourceid = sourceid;
     }
-
-
 }

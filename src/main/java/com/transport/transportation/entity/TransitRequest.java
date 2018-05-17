@@ -32,7 +32,7 @@ public class TransitRequest {
     @JsonIgnore
     @JoinColumn(name = "username")
     @NotNull
-    private User user;
+    private SignUp user;
 
     @Transient
     @JoinColumn(insertable = false, updatable = false)
@@ -115,11 +115,11 @@ public class TransitRequest {
         this.destinationId = destinationId;
     }
 
-    public User getUser() {
+    public SignUp getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(SignUp user) {
         this.user = user;
     }
 

@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/costconfiguration")
-public class CostConfigService {
+@RequestMapping("/taxi/costconfiguration")
+public class TaxiCostConfigService {
 
     private CostConfigRepository costConfigRepository;
 
     @Autowired
-    public CostConfigService(CostConfigRepository costConfigRepository) {
+    public TaxiCostConfigService(CostConfigRepository costConfigRepository) {
         this.costConfigRepository = costConfigRepository;
     }
 

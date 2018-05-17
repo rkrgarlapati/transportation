@@ -14,7 +14,7 @@ public class TransportRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "REQUESTID")
-    private int requestId;
+    private int requestid;
 
     @OneToOne
     @JsonIgnore
@@ -30,9 +30,9 @@ public class TransportRequest {
 
     @OneToOne
     @JsonIgnore
-    @JoinColumn(name = "username")
+    @JoinColumn(name = "email")
     @NotNull
-    private User user;
+    private SignUp user;
 
     @Transient
     @JoinColumn(insertable = false, updatable = false)
@@ -48,9 +48,9 @@ public class TransportRequest {
 
     @Transient
     @JoinColumn(insertable = false, updatable = false)
-    @Column(name = "username")
+    @Column(name = "email")
     @JsonProperty
-    private String username;
+    private String email;
 
     @NotNull
     @Column(name = "COST")
@@ -76,9 +76,6 @@ public class TransportRequest {
     @Column(name = "REQUESTSTATUS")
     private String requestStatus;
 
-    @Column(name = "UPDATEDDATE")
-    private Date updatedDate;
-
     @Column(name = "usertype")
     private String userType;
 
@@ -90,8 +87,8 @@ public class TransportRequest {
         this.userType = userType;
     }
 
-    public int getRequestId() {
-        return requestId;
+    public int getRequestid() {
+        return requestid;
     }
 
     @JsonIgnore
@@ -114,22 +111,22 @@ public class TransportRequest {
         this.destinationId = destinationId;
     }
 
-    public User getUser() {
+    public SignUp getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(SignUp user) {
         this.user = user;
     }
 
     @JsonIgnore
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
     @JsonProperty
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getMobileNo() {
@@ -156,8 +153,8 @@ public class TransportRequest {
         this.cashInHand = cashInHand;
     }
 
-    public void setRequestId(int requestId) {
-        this.requestId = requestId;
+    public void setRequestid(int requestid) {
+        this.requestid = requestid;
     }
 
     public int getMultipleTrips() {
@@ -182,14 +179,6 @@ public class TransportRequest {
 
     public void setRequestStatus(String requestStatus) {
         this.requestStatus = requestStatus;
-    }
-
-    public Date getUpdatedDate() {
-        return updatedDate;
-    }
-
-    public void setUpdatedDate(Date updatedDate) {
-        this.updatedDate = updatedDate;
     }
 
     public Source getSour() {

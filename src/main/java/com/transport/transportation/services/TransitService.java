@@ -36,10 +36,10 @@ public class TransitService {
 
         transReq.setRequestStatus("P");
 
-        User user = new User();
+        /*User user = new User();
         user.setUsername(transReq.getUsername());
         user.setUserType(transReq.getUserType());
-        transReq.setUser(user);
+        transReq.setUser(user);*/
 
         transitRepository.save(transReq);
 
@@ -57,7 +57,7 @@ public class TransitService {
         if (count > 0) {
             if (reqStatus.equalsIgnoreCase("A")) {
                 Invoice invoice = new Invoice();
-                invoice.setRequestId(requestId);
+                invoice.setRequestid(requestId);
 
                 invoiceRepository.save(invoice);
             }
@@ -123,8 +123,8 @@ public class TransitService {
         dest.setSource(transReq.getSour().getSourcename());
         dest.setSourceId(null);
         dest.setDestinationId(null);
-        User user = transReq.getUser();
-        dest.setUserFullName(user.getFirstName().concat(" ").concat(user.getLastName()));
+        /*User user = transReq.getUser();
+        dest.setUserFullName(user.getFirstName().concat(" ").concat(user.getLastName()));*/
 
         return dest;
     }

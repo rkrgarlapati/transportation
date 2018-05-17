@@ -1,6 +1,9 @@
 package com.transport.transportation.swagger;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Contact;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.License;
+import io.swagger.annotations.SwaggerDefinition;
 
 @SwaggerDefinition(
         info = @Info(
