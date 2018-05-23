@@ -1,24 +1,43 @@
 package com.transport.transportation.services;
 
 import com.transport.transportation.dto.DriverBlockUnblock;
+import com.transport.transportation.dto.DrivingFinish;
+import com.transport.transportation.dto.DrivingStart;
+import com.transport.transportation.email.TransportReqSendEmailToAdmin;
 import com.transport.transportation.entity.Driver;
 import com.transport.transportation.entity.SignUp;
+import com.transport.transportation.entity.TransportRequest;
 import com.transport.transportation.repository.DriverRepository;
+import com.transport.transportation.repository.SignUpRepository;
+import com.transport.transportation.repository.TaxiRequestRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/driver")
 public class DriverService {
 
     private DriverRepository driverRepository;
+
+    @Autowired
+    private TaxiRequestRepository transReqRepository;
+
+    @Autowired
+    private SignUpRepository signUpRepository;
+
+    @Autowired
+    private TransportReqSendEmailToAdmin emailToAdmin;
 
     @Autowired
     RestTemplate restTemplate;
@@ -110,4 +129,112 @@ public class DriverService {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @PatchMapping("/{driveremail}/{requestId}/{reqStatus}")
+    @Transactional
+    public ResponseEntity<?> acceptRide(@PathVariable String driveremail, @PathVariable Integer requestId,
+                                        @PathVariable String reqStatus) {
+
+        HttpStatus status = HttpStatus.NO_CONTENT;
+
+        //fetch transport request details
+        Optional<TransportRequest> value = transReqRepository.findById(requestId);
+        TransportRequest transportRequest = value.get();
+
+        //check if this request is already picked by any other driver.
+        if (StringUtils.isBlank(transportRequest.getDriveremail()) && transportRequest.getRequestStatus().equals("A")) {
+
+            if (reqStatus.equalsIgnoreCase("ACK")) {
+
+                /*Invoice invoice = new Invoice();
+                invoice.setRequestid(requestId);
+                invoiceRepository.save(invoice);*/
+
+                //Fetch driver details to send mail to customer and admin
+                Optional<Driver> driverVal = driverRepository.findById(driveremail);
+                Driver driver = driverVal.get();
+
+                //fetch all admin emailids to send mail
+                List<SignUp> allAdminUsers = signUpRepository.findByUsertype("ADMIN");
+                List<String> allAdminEmailIDs = allAdminUsers.stream().map(SignUp::getEmail).collect(Collectors.toList());
+
+                Random random = new Random();
+                String otp = String.format("%04d", random.nextInt(10000));
+
+                //assign transport request to driver.
+                int count = transReqRepository.changeRequestStatusAssignDriverOtp(reqStatus, driveremail, otp, requestId);
+
+                if (count > 0) {
+                    new Thread(() -> {
+                        emailToAdmin.sendEmailToAdminsAndCustomer(allAdminEmailIDs, transportRequest, driver, otp);
+                    }).start();
+                }
+            }
+        } else {
+            status = HttpStatus.NOT_FOUND;
+        }
+
+        return new ResponseEntity<>(status);
+    }
+
+    @PostMapping("/start")
+    @Transactional
+    public ResponseEntity<?> startRide(@RequestBody DrivingStart drivingStart) {
+
+        HttpStatus status = HttpStatus.NO_CONTENT;
+
+        Integer requestId = drivingStart.getRequestId();
+        String reqStatus = drivingStart.getReqStatus();
+        String driveremail = drivingStart.getDriveremail();
+        String otpReq = drivingStart.getOtp();
+
+        Optional<TransportRequest> transportRequest = transReqRepository.findById(requestId);
+        TransportRequest transportReq = transportRequest.get();
+
+        if (StringUtils.isNotEmpty(transportReq.getDriveremail()) && reqStatus.equalsIgnoreCase("START")) {
+            if (StringUtils.isNotEmpty(otpReq) && transportReq.getOtp().equals(otpReq) &&
+                    transportReq.getRequestStatus().equals("ACK") &&
+                    transportReq.getDriveremail().equals(driveremail)) {
+
+                transReqRepository.changeRequestStatus(reqStatus, requestId);
+            } else {
+                status = HttpStatus.BAD_REQUEST;
+            }
+        } else {
+            status = HttpStatus.NOT_FOUND;
+        }
+
+        return new ResponseEntity<>(status);
+    }
+
+    @PostMapping("/finish")
+    @Transactional
+    public ResponseEntity<?> finishRide(@RequestBody DrivingFinish drivingFinish) {
+
+        HttpStatus status = HttpStatus.NO_CONTENT;
+
+        Integer requestId = drivingFinish.getRequestId();
+        String reqStatus = drivingFinish.getReqStatus();
+        String driveremail = drivingFinish.getDriveremail();
+
+        Optional<TransportRequest> transportRequest = transReqRepository.findById(requestId);
+        TransportRequest transportReq = transportRequest.get();
+
+        if (StringUtils.isNotEmpty(transportReq.getDriveremail()) &&
+                reqStatus.equalsIgnoreCase("FINISH")) {
+
+            if (transportReq.getRequestStatus().equals("START") &&
+                    transportReq.getDriveremail().equals(driveremail)) {
+
+                transReqRepository.changeRequestStatus(reqStatus, requestId);
+            } else {
+                status = HttpStatus.BAD_REQUEST;
+            }
+        } else {
+            status = HttpStatus.NOT_FOUND;
+        }
+
+        return new ResponseEntity<>(status);
+    }
+
 }

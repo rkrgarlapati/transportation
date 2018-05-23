@@ -74,10 +74,37 @@ public class TransportRequest {
     private int roundTrips;
 
     @Column(name = "REQUESTSTATUS")
+    @NotNull
     private String requestStatus;
 
     @Column(name = "usertype")
     private String userType;
+
+    @Column(name = "driveremail")
+    private String driveremail;
+
+    @Column(name = "otp")
+    @JsonIgnore
+    private String otp;
+
+    public String getDriveremail() {
+        return driveremail;
+    }
+
+    @JsonIgnore
+    public void setDriveremail(String driveremail) {
+        this.driveremail = driveremail;
+    }
+
+    @JsonIgnore
+    public String getOtp() {
+        return otp;
+    }
+
+    @JsonIgnore
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
 
     public String getUserType() {
         return userType;
@@ -203,5 +230,28 @@ public class TransportRequest {
 
     public void setCost(double cost) {
         this.cost = cost;
+    }
+
+
+
+    @Override
+    public String toString() {
+        return "TransportRequest{" +
+                "requestid=" + requestid +
+                ", sour=" + sour +
+                ", dest=" + dest +
+                ", user=" + user +
+                ", sourceId=" + sourceId +
+                ", destinationId=" + destinationId +
+                ", email='" + email + '\'' +
+                ", cost=" + cost +
+                ", mobileNo='" + mobileNo + '\'' +
+                ", dateTime=" + dateTime +
+                ", cashInHand=" + cashInHand +
+                ", multipleTrips=" + multipleTrips +
+                ", roundTrips=" + roundTrips +
+                ", requestStatus='" + requestStatus + '\'' +
+                ", userType='" + userType + '\'' +
+                '}';
     }
 }

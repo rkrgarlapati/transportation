@@ -26,7 +26,6 @@ public class SignUp {
     @NotNull
     private String usertype;
 
-    @NotNull
     private String companyname;
 
     public String getEmail() {

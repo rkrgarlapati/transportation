@@ -3,9 +3,11 @@ package com.transport.transportation.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "COMPANYADDRESS")
@@ -13,7 +15,11 @@ import javax.persistence.Table;
 public class CompanyAddress {
 
     @Id
-    private int addressid;
+    @Column(name = "ADDRESSID")
+    private int id;
+
+    @NotNull
+    private String name;
     private String address;
     private String city;
     private String pincode;
@@ -21,12 +27,20 @@ public class CompanyAddress {
     @JsonIgnore
     private String username;
 
-    public int getAddressid() {
-        return addressid;
+    public int getId() {
+        return id;
     }
 
-    public void setAddressid(int addressid) {
-        this.addressid = addressid;
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAddress() {

@@ -1,11 +1,13 @@
 package com.transport.transportation.repository;
 
 import com.transport.transportation.entity.SignUp;
+import com.transport.transportation.entity.TransportRequest;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 public interface SignUpRepository extends CrudRepository<SignUp, String> {
 
@@ -18,4 +20,9 @@ public interface SignUpRepository extends CrudRepository<SignUp, String> {
     @Query("update SignUp u set u.password = ?1  where u.email = ?3 and u.password = ?2")
     @Transactional
     int updatePassword(String newpassword, String oldpassword, String username);
+
+    List<SignUp> findByUsertype(String usertype);
+
+    @Query("SELECT DISTINCT a.companyname FROM SignUp a where a.companyname IS NOT NULL")
+    List<String> getCompanies();
 }

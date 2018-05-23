@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 public interface DriverRepository extends CrudRepository<Driver, String> {
 
@@ -14,4 +15,6 @@ public interface DriverRepository extends CrudRepository<Driver, String> {
     @Query("update Driver u set u.status = ?1  where u.email = ?2")
     @Transactional
     int updateStatus(String status, String email);
+
+    List<Driver> findByStatus(String status);
 }

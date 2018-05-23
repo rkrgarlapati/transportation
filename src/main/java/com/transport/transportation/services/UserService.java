@@ -3,6 +3,7 @@ package com.transport.transportation.services;
 import com.transport.transportation.dto.ChangePassword;
 import com.transport.transportation.dto.ForgotPassword;
 import com.transport.transportation.dto.LoginUser;
+import com.transport.transportation.entity.CompanyAddress;
 import com.transport.transportation.entity.SignUp;
 import com.transport.transportation.repository.CompanyAddressRepository;
 import com.transport.transportation.repository.SignUpRepository;
@@ -61,25 +62,33 @@ public class UserService {
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody SignUp sign) {
 
-        SignUp signUp = sign;
-        signUp.setUsertype(sign.getUsertype().toUpperCase());
-
         HttpStatus status = HttpStatus.CREATED;
 
-        Random random = new Random();
-        String password = String.format("%04d", random.nextInt(10000));
+        Optional<SignUp> verifyDB = signUpRepository.findById(sign.getEmail());
 
-        signUp.setPassword(password);
-        signUpRepository.save(signUp);
+        if (verifyDB.isPresent()) {
+            status = HttpStatus.CONFLICT;
+        } else {
 
-        Optional<SignUp> userFromDB = signUpRepository.findById(sign.getEmail());
+            SignUp signUp = sign;
+            signUp.setUsertype(sign.getUsertype().toUpperCase());
 
-        if (userFromDB.isPresent()) {
+            CompanyAddress companyAddress = new CompanyAddress();
+            companyAddress.setName(sign.getCompanyname());
+
+            Random random = new Random();
+            String password = String.format("%04d", random.nextInt(10000));
+            signUp.setPassword(password);
+
+            signUpRepository.save(signUp);
+            addressRepository.save(companyAddress);
+
+            Optional<SignUp> userFromDB = signUpRepository.findById(sign.getEmail());
 
             SignUp userDB = userFromDB.get();
 
             new Thread(() -> {
-                signUpEmail.sendMail(userDB);
+                //signUpEmail.sendMail(userDB);
             }).start();
         }
 

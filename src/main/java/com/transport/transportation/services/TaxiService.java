@@ -3,10 +3,9 @@ package com.transport.transportation.services;
 import com.transport.transportation.common.CommonUtil;
 import com.transport.transportation.csv.GenerateCSV;
 import com.transport.transportation.dto.SendTransportDocument;
+import com.transport.transportation.email.TransportReqSendEmailToAdmin;
 import com.transport.transportation.entity.*;
-import com.transport.transportation.pdf.GeneratePDF;
-import com.transport.transportation.repository.InvoiceRepository;
-import com.transport.transportation.repository.TaxiRequestRepository;
+import com.transport.transportation.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/taxi")
@@ -36,26 +36,41 @@ public class TaxiService {
     @Autowired
     private GenerateCSV csv;
 
+    @Autowired
+    private SignUpRepository signUpRepository;
+
+    @Autowired
+    private TransportReqSendEmailToAdmin emailToAdmin;
+
+    @Autowired
+    private SourceRepository sourceRepository;
+
+    @Autowired
+    private DestinationRepository destinationRepository;
+
+    @Autowired
+    private DriverRepository driverRepository;
+
     @PostMapping
+    @Transactional
     public ResponseEntity<?> transportRequest(@RequestBody TransportRequestPost transRequest) {
 
         TransportRequest transReq = new TransportRequest();
 
         Destination dest = new Destination();
+        Source source = new Source();
+        SignUp user = new SignUp();
+
         dest.setDestinationid(transRequest.getDestinationId());
         transReq.setDest(dest);
-
-        Source source = new Source();
         source.setSourceid(transRequest.getSourceId());
         transReq.setSour(source);
-
         transReq.setRequestStatus("P");
-
-        SignUp user = new SignUp();
         user.setEmail(transRequest.getEmail());
+        transReq.setSourceId(transRequest.getSourceId());
+        transReq.setDestinationId(transRequest.getDestinationId());
         transReq.setUser(user);
-        transReq.setUserType(transRequest.getUserType());
-
+        transReq.setUserType(transRequest.getUserType().toUpperCase());
         transReq.setRoundTrips(transRequest.getRoundTrips());
         transReq.setMultipleTrips(transRequest.getMultipleTrips());
         transReq.setCashInHand(transRequest.getCashInHand());
@@ -63,10 +78,26 @@ public class TaxiService {
         transReq.setMobileNo(transRequest.getMobileNo());
         transReq.setCost(transRequest.getCost());
 
-        transReqRepository.save(transReq);
+        TransportRequest inserted = transReqRepository.save(transReq);
+
+        Optional<Source> sourceVal = sourceRepository.findById(source.getSourceid());
+        source.setSourcename(sourceVal.get().getSourcename());
+
+        Optional<Destination> destiVal = destinationRepository.findById(dest.getDestinationid());
+        dest.setDestinationname(destiVal.get().getDestinationname());
+
+        List<SignUp> allAdminUsers = signUpRepository.findByUsertype("ADMIN");
+        List<String> allAdminEmailIDs = getAllEmailIDs(allAdminUsers);
+
+        if (inserted != null) {
+            new Thread(() -> {
+                emailToAdmin.sendTransportRequestEmails(allAdminEmailIDs, inserted, "P");
+            }).start();
+        }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+
 
     @GetMapping("/{reqStatus}")
     public ResponseEntity<Iterable<TransRequestCustom>> getAllByRequestStatus(@PathVariable String reqStatus) {
@@ -97,6 +128,18 @@ public class TaxiService {
                 invoice.setRequestid(requestId);
 
                 invoiceRepository.save(invoice);
+
+                Optional<TransportRequest> value = transReqRepository.findById(requestId);
+
+                TransportRequest transportRequest = value.get();
+
+                List<Driver> allDrivers = driverRepository.findByStatus("UNBLOCK");
+                List<String> allDriversEmailIDs = allDrivers.stream().map(Driver::getEmail).collect(Collectors.toList());
+
+                new Thread(() -> {
+                    emailToAdmin.sendTransportRequestEmails(allDriversEmailIDs, transportRequest, "A");
+                }).start();
+
             }
             status = HttpStatus.NO_CONTENT;
         } else {
@@ -186,5 +229,10 @@ public class TaxiService {
         }
 
         return new ResponseEntity<>(status);
+    }
+
+    private List<String> getAllEmailIDs(List<SignUp> allAdminUsers) {
+
+        return allAdminUsers.stream().map(SignUp::getEmail).collect(Collectors.toList());
     }
 }
