@@ -1,7 +1,7 @@
 package com.transport.transportation.services;
 
-import com.transport.transportation.entity.Product;
-import com.transport.transportation.entity.ProductName;
+import com.transport.transportation.entity.TransitProducts;
+import com.transport.transportation.entity.TransitProductName;
 import com.transport.transportation.repository.ProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,40 +12,40 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/product")
-public class ProductsService {
+public class TransitProductsService {
 
     private ProductsRepository productsRepository;
 
     @Autowired
-    public ProductsService(ProductsRepository productsRepository) {
+    public TransitProductsService(ProductsRepository productsRepository) {
         this.productsRepository = productsRepository;
     }
 
     @PostMapping
-    public ResponseEntity<?> add(@RequestBody ProductName productName) {
+    public ResponseEntity<?> add(@RequestBody TransitProductName transitProductName) {
 
-        Product product = new Product();
-        product.setProductid(null);
-        product.setProductname(productName.getProductname());
+        TransitProducts transitProducts = new TransitProducts();
+        transitProducts.setProductid(null);
+        transitProducts.setProductname(transitProductName.getProductname());
 
-        productsRepository.save(product);
+        productsRepository.save(transitProducts);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<?> edit(@RequestBody Product product) {
+    public ResponseEntity<?> edit(@RequestBody TransitProducts transitProducts) {
 
-        productsRepository.save(product);
+        productsRepository.save(transitProducts);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Product>> getAll() {
+    public ResponseEntity<Iterable<TransitProducts>> getAll() {
         HttpStatus status;
 
-        Iterable<Product> all = productsRepository.findAll();
+        Iterable<TransitProducts> all = productsRepository.findAll();
 
         if (all.spliterator().getExactSizeIfKnown() > 0) {
             status = HttpStatus.OK;
@@ -68,7 +68,7 @@ public class ProductsService {
     @GetMapping("/{productid}")
     public ResponseEntity<?> getById(@PathVariable Integer productid) {
 
-        Optional<Product> product = productsRepository.findById(productid);
+        Optional<TransitProducts> product = productsRepository.findById(productid);
 
         if(product.isPresent()) {
             return new ResponseEntity<>(product, HttpStatus.OK);

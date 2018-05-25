@@ -26,6 +26,10 @@ public class TransitCostConfiguration {
     @Transient
     private Integer sourceid;
 
+    @JoinColumn(insertable = false, updatable = false)
+    @Transient
+    private Double trucksize;
+
     public double getCost() {
         return cost;
     }
@@ -56,5 +60,13 @@ public class TransitCostConfiguration {
 
     public void setCostConfigEmbed(TransitCostConfigEmbed costConfigEmbed) {
         this.costConfigEmbed = costConfigEmbed;
+    }
+
+    public Double getTrucksize() {
+        return trucksize;
+    }
+
+    public void setTrucksize(Double trucksize) {
+        this.trucksize = trucksize;
     }
 }

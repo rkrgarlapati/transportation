@@ -27,7 +27,7 @@ public class TransitCostConfigService {
     public ResponseEntity<?> addCost(@RequestBody TransitCostConfiguration costConfig) {
 
         TransitCostConfigEmbed costConfigEmbed = getId(costConfig.getSourceid(),
-                costConfig.getDestinationid());
+                costConfig.getDestinationid(), costConfig.getTrucksize());
 
         costConfig.setCostConfigEmbed(costConfigEmbed);
 
@@ -36,11 +36,12 @@ public class TransitCostConfigService {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping("/{sourceid}/{destination}")
+    @GetMapping("/{sourceid}/{destination}/{trucksize}")
     public ResponseEntity<?> login(@PathVariable Integer sourceid,
-                                   @PathVariable Integer destination) {
+                                   @PathVariable Integer destination,
+                                   @PathVariable Double trucksize) {
 
-        TransitCostConfigEmbed costConfigEmbed = getId(sourceid, destination);
+        TransitCostConfigEmbed costConfigEmbed = getId(sourceid, destination, trucksize);
         Optional<TransitCostConfiguration> value = costConfigRepository.findById(costConfigEmbed);
 
         if (value.isPresent()) {
@@ -50,7 +51,7 @@ public class TransitCostConfigService {
         }
     }
 
-    public TransitCostConfigEmbed getId(Integer sourceid, Integer destination) {
+    public TransitCostConfigEmbed getId(Integer sourceid, Integer destination, Double trucksize) {
         TransitCostConfigEmbed costConfigEmbed = new TransitCostConfigEmbed();
 
         TransitDestination dest = new TransitDestination();
@@ -60,6 +61,8 @@ public class TransitCostConfigService {
         TransitSource source = new TransitSource();
         source.setSourceid(sourceid);
         costConfigEmbed.setSource(source);
+
+        costConfigEmbed.setTrucksize(trucksize);
 
         return costConfigEmbed;
     }

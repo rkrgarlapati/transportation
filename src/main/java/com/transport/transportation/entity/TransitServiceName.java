@@ -5,7 +5,7 @@ import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 
 @MappedSuperclass
-public class ServiceName {
+public class TransitServiceName {
 
     @NotNull
     @Column(name = "SERVICENAME")

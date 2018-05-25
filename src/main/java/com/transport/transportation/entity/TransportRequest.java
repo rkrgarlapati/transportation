@@ -114,6 +114,7 @@ public class TransportRequest {
         this.userType = userType;
     }
 
+    @JsonIgnore
     public int getRequestid() {
         return requestid;
     }
@@ -180,6 +181,7 @@ public class TransportRequest {
         this.cashInHand = cashInHand;
     }
 
+    @JsonProperty
     public void setRequestid(int requestid) {
         this.requestid = requestid;
     }

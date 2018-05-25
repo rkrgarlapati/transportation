@@ -5,7 +5,7 @@ import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 
 @MappedSuperclass
-public class ProductName {
+public class TransitProductName {
 
     @NotNull
     @Column(name = "PRODUCTNAME")

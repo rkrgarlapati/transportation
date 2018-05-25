@@ -1,6 +1,8 @@
 package com.transport.transportation.services;
 
+import com.transport.transportation.common.CommonUtil;
 import com.transport.transportation.entity.SignUp;
+import com.transport.transportation.entity.TransRequestCustom;
 import com.transport.transportation.entity.TransportRequest;
 import com.transport.transportation.repository.TaxiRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,82 +23,72 @@ public class DriverAndUserRideHistory {
     @Autowired
     private TaxiRequestRepository transReqRepository;
 
+    @Autowired
+    private CommonUtil commonUtil;
+
     @GetMapping("/user/{emailid}")
     public ResponseEntity<?> getUserRides(@PathVariable String emailid) {
 
-        List<TransportRequest> transportRequests = new ArrayList<>();
-        HttpStatus status;
-
         SignUp user = new SignUp();
         user.setEmail(emailid);
-        Iterable<TransportRequest> allReqs = transReqRepository.findAllByUser(user);
-        allReqs.forEach(transportRequests::add);
+        Iterable<TransportRequest> allrequests = transReqRepository.findAllByUser(user);
 
-        if (transportRequests.size() > 0) {
-            status = HttpStatus.OK;
-        } else {
-            status = HttpStatus.NOT_FOUND;
-        }
+        List<TransRequestCustom> allReq = new ArrayList<>();
+        allrequests.forEach(req -> {
+            TransRequestCustom dest = commonUtil.copyRequest(req);
+            allReq.add(dest);
+        });
 
-        return new ResponseEntity<>(transportRequests, status);
+        return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 
     @GetMapping("/user/{emailid}/{reqstatus}")
     public ResponseEntity<?> getUserRidesOnStatus(@PathVariable String emailid,
                                                   @PathVariable String reqstatus) {
-        List<TransportRequest> transportRequests = new ArrayList<>();
-        HttpStatus status;
+
+        List<TransRequestCustom> allReq = new ArrayList<>();
 
         SignUp user = new SignUp();
         user.setEmail(emailid);
 
-        Iterable<TransportRequest> allReqs =
+        Iterable<TransportRequest> allrequests =
                 transReqRepository.findAllByUserAndRequestStatus(user, reqstatus);
-        allReqs.forEach(transportRequests::add);
 
-        if (transportRequests.size() > 0) {
-            status = HttpStatus.OK;
-        } else {
-            status = HttpStatus.NOT_FOUND;
-        }
+        allrequests.forEach(req -> {
+            TransRequestCustom dest = commonUtil.copyRequest(req);
+            allReq.add(dest);
+        });
 
-        return new ResponseEntity<>(transportRequests, status);
+        return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 
     @GetMapping("/driver/{emailid}")
     public ResponseEntity<?> getDriverRides(@PathVariable String emailid) {
-        List<TransportRequest> transportRequests = new ArrayList<>();
-        HttpStatus status;
 
-        Iterable<TransportRequest> allReqs =
+        List<TransRequestCustom> allReq = new ArrayList<>();
+
+        Iterable<TransportRequest> allrequests =
                 transReqRepository.findAllByDriveremail(emailid);
-        allReqs.forEach(transportRequests::add);
+        allrequests.forEach(req -> {
+            TransRequestCustom dest = commonUtil.copyRequest(req);
+            allReq.add(dest);
+        });
 
-        if (transportRequests.size() > 0) {
-            status = HttpStatus.OK;
-        } else {
-            status = HttpStatus.NOT_FOUND;
-        }
-
-        return new ResponseEntity<>(transportRequests, status);
+        return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 
-    @GetMapping("/driver/{emailid}/{status}")
+    @GetMapping("/driver/{emailid}/{reqstatus}")
     public ResponseEntity<?> getDriverRidesOnStatus(@PathVariable String emailid,
                                                     @PathVariable String reqstatus) {
-        List<TransportRequest> transportRequests = new ArrayList<>();
-        HttpStatus status;
+        List<TransRequestCustom> allReq = new ArrayList<>();
 
         Iterable<TransportRequest> allReqs =
                 transReqRepository.findAllByDriveremailAndRequestStatus(emailid, reqstatus);
-        allReqs.forEach(transportRequests::add);
+        allReqs.forEach(req -> {
+            TransRequestCustom dest = commonUtil.copyRequest(req);
+            allReq.add(dest);
+        });
 
-        if (transportRequests.size() > 0) {
-            status = HttpStatus.OK;
-        } else {
-            status = HttpStatus.NOT_FOUND;
-        }
-
-        return new ResponseEntity<>(transportRequests, status);
+        return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 }

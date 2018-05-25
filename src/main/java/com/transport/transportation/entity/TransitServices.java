@@ -3,8 +3,8 @@ package com.transport.transportation.entity;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "SERVICE")
-public class Service extends ServiceName{
+@Table(name = "TRANSITSERVICES")
+public class TransitServices extends TransitServiceName {
 
     @Id
     @Column(name = "SERVICEID")

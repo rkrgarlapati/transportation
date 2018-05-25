@@ -88,7 +88,7 @@ public class UserService {
             SignUp userDB = userFromDB.get();
 
             new Thread(() -> {
-                //signUpEmail.sendMail(userDB);
+                signUpEmail.sendMail(userDB);
             }).start();
         }
 

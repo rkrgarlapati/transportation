@@ -23,6 +23,9 @@ public class TransitCostConfigEmbed implements Serializable {
     @NotNull
     private TransitDestination destination;
 
+    @NotNull
+    private Double trucksize;
+
     public TransitSource getSource() {
         return source;
     }
@@ -37,5 +40,13 @@ public class TransitCostConfigEmbed implements Serializable {
 
     public void setDestination(TransitDestination destination) {
         this.destination = destination;
+    }
+
+    public Double getTrucksize() {
+        return trucksize;
+    }
+
+    public void setTrucksize(Double trucksize) {
+        this.trucksize = trucksize;
     }
 }

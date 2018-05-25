@@ -1,7 +1,7 @@
 package com.transport.transportation.services;
 
-import com.transport.transportation.entity.Service;
-import com.transport.transportation.entity.ServiceName;
+import com.transport.transportation.entity.TransitServices;
+import com.transport.transportation.entity.TransitServiceName;
 import com.transport.transportation.repository.ServicesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,40 +12,40 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/service")
-public class ServicesService {
+public class TransitServicesService {
 
     private ServicesRepository serviceRepository;
 
     @Autowired
-    public ServicesService(ServicesRepository serviceRepository) {
+    public TransitServicesService(ServicesRepository serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
 
     @PostMapping
-    public ResponseEntity<?> add(@RequestBody ServiceName serviceName) {
+    public ResponseEntity<?> add(@RequestBody TransitServiceName transitServiceName) {
 
-        Service service = new Service();
-        service.setServiceid(null);
-        service.setServicename(serviceName.getServicename());
+        TransitServices transitServices = new TransitServices();
+        transitServices.setServiceid(null);
+        transitServices.setServicename(transitServiceName.getServicename());
 
-        serviceRepository.save(service);
+        serviceRepository.save(transitServices);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<?> edit(@RequestBody Service service) {
+    public ResponseEntity<?> edit(@RequestBody TransitServices transitServices) {
 
-        serviceRepository.save(service);
+        serviceRepository.save(transitServices);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Service>> getAll() {
+    public ResponseEntity<Iterable<TransitServices>> getAll() {
         HttpStatus status;
 
-        Iterable<Service> all = serviceRepository.findAll();
+        Iterable<TransitServices> all = serviceRepository.findAll();
 
         if (all.spliterator().getExactSizeIfKnown() > 0) {
             status = HttpStatus.OK;
@@ -68,7 +68,7 @@ public class ServicesService {
     @GetMapping("/{serviceid}")
     public ResponseEntity<?> getById(@PathVariable Integer serviceid) {
 
-        Optional<Service> service = serviceRepository.findById(serviceid);
+        Optional<TransitServices> service = serviceRepository.findById(serviceid);
 
         if(service.isPresent()) {
             return new ResponseEntity<>(service, HttpStatus.OK);
