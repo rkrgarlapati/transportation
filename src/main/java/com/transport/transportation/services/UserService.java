@@ -70,26 +70,28 @@ public class UserService {
             status = HttpStatus.CONFLICT;
         } else {
 
-            SignUp signUp = sign;
-            signUp.setUsertype(sign.getUsertype().toUpperCase());
+            String usertype = sign.getUsertype().toUpperCase();
 
-            CompanyAddress companyAddress = new CompanyAddress();
-            companyAddress.setName(sign.getCompanyname());
+            SignUp signUp = sign;
+            signUp.setUsertype(usertype);
 
             Random random = new Random();
             String password = String.format("%04d", random.nextInt(10000));
             signUp.setPassword(password);
 
-            signUpRepository.save(signUp);
-            addressRepository.save(companyAddress);
+            SignUp saved = signUpRepository.save(signUp);
 
-            Optional<SignUp> userFromDB = signUpRepository.findById(sign.getEmail());
+            if (usertype.equals("COMPANY")) {
+                CompanyAddress companyAddress = new CompanyAddress();
+                companyAddress.setName(sign.getCompanyname());
+                addressRepository.save(companyAddress);
+            }
 
-            SignUp userDB = userFromDB.get();
-
-            new Thread(() -> {
-                signUpEmail.sendMail(userDB);
-            }).start();
+            if (saved != null) {
+                new Thread(() -> {
+                    signUpEmail.sendMail(signUp);
+                }).start();
+            }
         }
 
         return new ResponseEntity<>(status);
