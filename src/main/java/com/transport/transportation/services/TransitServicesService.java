@@ -2,7 +2,7 @@ package com.transport.transportation.services;
 
 import com.transport.transportation.entity.TransitServices;
 import com.transport.transportation.entity.TransitServiceName;
-import com.transport.transportation.repository.ServicesRepository;
+import com.transport.transportation.repository.TransitServicesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +14,10 @@ import java.util.Optional;
 @RequestMapping("/service")
 public class TransitServicesService {
 
-    private ServicesRepository serviceRepository;
+    private TransitServicesRepository serviceRepository;
 
     @Autowired
-    public TransitServicesService(ServicesRepository serviceRepository) {
+    public TransitServicesService(TransitServicesRepository serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
 

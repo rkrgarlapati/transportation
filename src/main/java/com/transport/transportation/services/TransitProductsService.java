@@ -2,7 +2,7 @@ package com.transport.transportation.services;
 
 import com.transport.transportation.entity.TransitProducts;
 import com.transport.transportation.entity.TransitProductName;
-import com.transport.transportation.repository.ProductsRepository;
+import com.transport.transportation.repository.TransitProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +14,11 @@ import java.util.Optional;
 @RequestMapping("/product")
 public class TransitProductsService {
 
-    private ProductsRepository productsRepository;
+    private TransitProductsRepository transitProductsRepository;
 
     @Autowired
-    public TransitProductsService(ProductsRepository productsRepository) {
-        this.productsRepository = productsRepository;
+    public TransitProductsService(TransitProductsRepository transitProductsRepository) {
+        this.transitProductsRepository = transitProductsRepository;
     }
 
     @PostMapping
@@ -28,7 +28,7 @@ public class TransitProductsService {
         transitProducts.setProductid(null);
         transitProducts.setProductname(transitProductName.getProductname());
 
-        productsRepository.save(transitProducts);
+        transitProductsRepository.save(transitProducts);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -36,7 +36,7 @@ public class TransitProductsService {
     @PutMapping
     public ResponseEntity<?> edit(@RequestBody TransitProducts transitProducts) {
 
-        productsRepository.save(transitProducts);
+        transitProductsRepository.save(transitProducts);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -45,7 +45,7 @@ public class TransitProductsService {
     public ResponseEntity<Iterable<TransitProducts>> getAll() {
         HttpStatus status;
 
-        Iterable<TransitProducts> all = productsRepository.findAll();
+        Iterable<TransitProducts> all = transitProductsRepository.findAll();
 
         if (all.spliterator().getExactSizeIfKnown() > 0) {
             status = HttpStatus.OK;
@@ -60,7 +60,7 @@ public class TransitProductsService {
     @DeleteMapping("/{productid}")
     public ResponseEntity<?> delete(@PathVariable Integer productid) {
 
-        productsRepository.deleteById(productid);
+        transitProductsRepository.deleteById(productid);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -68,7 +68,7 @@ public class TransitProductsService {
     @GetMapping("/{productid}")
     public ResponseEntity<?> getById(@PathVariable Integer productid) {
 
-        Optional<TransitProducts> product = productsRepository.findById(productid);
+        Optional<TransitProducts> product = transitProductsRepository.findById(productid);
 
         if(product.isPresent()) {
             return new ResponseEntity<>(product, HttpStatus.OK);
