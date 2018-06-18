@@ -100,6 +100,7 @@ public class TransitRequest {
     @JsonIgnore
     private String otp;
 
+    private Double cashinhand;
     /*@Lob
     private byte[] customsdoc;*/
 
@@ -280,5 +281,13 @@ public class TransitRequest {
 
     public void setMobileNo(String mobileNo) {
         this.mobileNo = mobileNo;
+    }
+
+    public Double getCashinhand() {
+        return cashinhand;
+    }
+
+    public void setCashinhand(Double cashinhand) {
+        this.cashinhand = cashinhand;
     }
 }

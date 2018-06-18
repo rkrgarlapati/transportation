@@ -90,6 +90,7 @@ public class TransitService {
         transitRequest.setDateTime(transReq.getDateTime());
         transitRequest.setMobileNo(transReq.getMobileNo());
         transitRequest.setCost(transReq.getCost());
+        transitRequest.setCashinhand(transReq.getCashinhand());
 
         TransitRequest inserted = transitRepository.save(transitRequest);
 
@@ -229,6 +230,9 @@ public class TransitService {
         dest.setSource(transReq.getSour().getSourcename());
         dest.setSourceId(null);
         dest.setDestinationId(null);
+        if(transReq.getCashinhand() != null) {
+            dest.setCashinhand(transReq.getCashinhand());
+        }
         /*User user = transReq.getUser();
         dest.setUserFullName(user.getFirstName().concat(" ").concat(user.getLastName()));*/
 

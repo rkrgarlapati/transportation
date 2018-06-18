@@ -2,9 +2,8 @@ package com.transport.transportation.services;
 
 import com.transport.transportation.common.CommonUtil;
 import com.transport.transportation.dto.RideHistory;
-import com.transport.transportation.entity.SignUp;
-import com.transport.transportation.entity.TransitRequest;
-import com.transport.transportation.entity.TransportRequest;
+import com.transport.transportation.entity.*;
+import com.transport.transportation.repository.EcomTaxiRequestRepository;
 import com.transport.transportation.repository.TaxiRequestRepository;
 import com.transport.transportation.repository.TransitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,26 +28,22 @@ public class DriverAndUserRideHistory {
     private TransitRepository transitRepository;
 
     @Autowired
+    private EcomTaxiRequestRepository ecomTaxiRequestRepository;
+
+    @Autowired
     private CommonUtil commonUtil;
 
     @GetMapping("/user/{emailid}")
     public ResponseEntity<?> getUserRides(@PathVariable String emailid) {
-        List<RideHistory> allReq = new ArrayList<>();
+
         SignUp user = new SignUp();
         user.setEmail(emailid);
 
         Iterable<TransportRequest> allrequests = transReqRepository.findAllByUser(user);
         Iterable<TransitRequest> allTransitrequests = transitRepository.findAllByUser(user);
+        Iterable<EcommerceTaxiRequest> ecommerceTaxiRequests = ecomTaxiRequestRepository.findAllByUser(user);
 
-        allrequests.forEach(req -> {
-            RideHistory dest = commonUtil.getCustomerHistory(req);
-            allReq.add(dest);
-        });
-
-        allTransitrequests.forEach(req -> {
-            RideHistory dest = commonUtil.getCustomerHistory(req);
-            allReq.add(dest);
-        });
+        List<RideHistory> allReq = setValues(allrequests, allTransitrequests, ecommerceTaxiRequests);
 
         return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
@@ -56,8 +51,6 @@ public class DriverAndUserRideHistory {
     @GetMapping("/user/{emailid}/{reqstatus}")
     public ResponseEntity<?> getUserRidesOnStatus(@PathVariable String emailid,
                                                   @PathVariable String reqstatus) {
-
-        List<RideHistory> allReq = new ArrayList<>();
 
         SignUp user = new SignUp();
         user.setEmail(emailid);
@@ -68,23 +61,34 @@ public class DriverAndUserRideHistory {
         Iterable<TransitRequest> allTransitrequests =
                 transitRepository.findAllByUserAndRequestStatus(user, reqstatus);
 
-        allrequests.forEach(req -> {
-            RideHistory dest = commonUtil.getCustomerHistory(req);
-            allReq.add(dest);
-        });
+        Iterable<EcommerceTaxiRequest> ecommerceTaxiRequests =
+                ecomTaxiRequestRepository.findAllByUserAndRequestStatus(user, reqstatus);
 
-        allTransitrequests.forEach(req -> {
-            RideHistory dest = commonUtil.getCustomerHistory(req);
-            allReq.add(dest);
-        });
+        List<RideHistory> allReq = setValues(allrequests, allTransitrequests, ecommerceTaxiRequests);
 
         return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 
+    @GetMapping("/user/rides/{reqstatus}")
+    public ResponseEntity<?> getAllRidesOnStatus(@PathVariable String reqstatus) {
+
+        Iterable<TransportRequest> allrequests =
+                transReqRepository.findAllByRequestStatus(reqstatus);
+
+        Iterable<TransitRequest> allTransitrequests =
+                transitRepository.findAllByRequestStatus(reqstatus);
+
+        Iterable<EcommerceTaxiRequest> ecommerceTaxiRequests =
+                ecomTaxiRequestRepository.findAllByRequestStatus(reqstatus);
+
+        List<RideHistory> allReq = setValues(allrequests, allTransitrequests, ecommerceTaxiRequests);
+
+        return new ResponseEntity<>(allReq, HttpStatus.OK);
+    }
+
+
     @GetMapping("/driver/{emailid}")
     public ResponseEntity<?> getDriverRides(@PathVariable String emailid) {
-
-        List<RideHistory> allReq = new ArrayList<>();
 
         Iterable<TransportRequest> allrequests =
                 transReqRepository.findAllByDriveremail(emailid);
@@ -92,15 +96,11 @@ public class DriverAndUserRideHistory {
         Iterable<TransitRequest> allTransitrequests =
                 transitRepository.findAllByDriveremail(emailid);
 
-        allrequests.forEach(req -> {
-            RideHistory dest = commonUtil.getCustomerHistory(req);
-            allReq.add(dest);
-        });
+        Iterable<EcommerceTaxiRequest> ecommerceTaxiRequests =
+                ecomTaxiRequestRepository.findAllByDriveremail(emailid);
 
-        allTransitrequests.forEach(req -> {
-            RideHistory dest = commonUtil.getCustomerHistory(req);
-            allReq.add(dest);
-        });
+
+        List<RideHistory> allReq = setValues(allrequests, allTransitrequests, ecommerceTaxiRequests);
 
         return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
@@ -108,7 +108,6 @@ public class DriverAndUserRideHistory {
     @GetMapping("/driver/{emailid}/{reqstatus}")
     public ResponseEntity<?> getDriverRidesOnStatus(@PathVariable String emailid,
                                                     @PathVariable String reqstatus) {
-        List<RideHistory> allReq = new ArrayList<>();
 
         Iterable<TransportRequest> allReqs =
                 transReqRepository.findAllByDriveremailAndRequestStatus(emailid, reqstatus);
@@ -116,16 +115,34 @@ public class DriverAndUserRideHistory {
         Iterable<TransitRequest> allTransitrequests =
                 transitRepository.findAllByDriveremailAndRequestStatus(emailid, reqstatus);
 
+        Iterable<EcommerceTaxiRequest> ecommerceTaxiRequests =
+                ecomTaxiRequestRepository.findAllByDriveremailAndRequestStatus(emailid, reqstatus);
+
+        List<RideHistory> allReq = setValues(allReqs, allTransitrequests, ecommerceTaxiRequests);
+
+        return new ResponseEntity<>(allReq, HttpStatus.OK);
+    }
+
+    private List<RideHistory> setValues(Iterable<TransportRequest> allReqs, Iterable<TransitRequest> allTransitrequests,
+                                        Iterable<EcommerceTaxiRequest> ecommerceTaxiRequests) {
+
+        List<RideHistory> allReq = new ArrayList<>();
+
         allReqs.forEach(req -> {
-            RideHistory dest = commonUtil.getCustomerHistory(req);
+            RideHistory dest = commonUtil.getCustomerHistory(req, "taxi");
             allReq.add(dest);
         });
 
         allTransitrequests.forEach(req -> {
-            RideHistory dest = commonUtil.getCustomerHistory(req);
+            RideHistory dest = commonUtil.getCustomerHistory(req, "transit");
             allReq.add(dest);
         });
 
-        return new ResponseEntity<>(allReq, HttpStatus.OK);
+        ecommerceTaxiRequests.forEach(req -> {
+            RideHistory dest = commonUtil.getCustomerHistory(req, "ecommerce");
+            allReq.add(dest);
+        });
+
+        return allReq;
     }
 }

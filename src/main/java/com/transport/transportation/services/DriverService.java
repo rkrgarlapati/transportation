@@ -3,6 +3,7 @@ package com.transport.transportation.services;
 import com.transport.transportation.dto.DriverBlockUnblock;
 import com.transport.transportation.dto.DrivingFinish;
 import com.transport.transportation.dto.DrivingStart;
+import com.transport.transportation.email.EcommerceReqSendEmailToAdmin;
 import com.transport.transportation.email.TransitReqSendEmailToAdmin;
 import com.transport.transportation.email.TransportReqSendEmailToAdmin;
 import com.transport.transportation.entity.*;
@@ -37,10 +38,16 @@ public class DriverService {
     private TransitRepository transitRepository;
 
     @Autowired
+    private EcomTaxiRequestRepository ecomTaxiRequestRepository;
+
+    @Autowired
     private SignUpRepository signUpRepository;
 
     @Autowired
     private TransportReqSendEmailToAdmin emailToAdmin;
+
+    @Autowired
+    private EcommerceReqSendEmailToAdmin ecommerceEmail;
 
     @Autowired
     private InvoiceRepository invoiceRepository;
@@ -144,6 +151,8 @@ public class DriverService {
 
         if (StringUtils.isNotEmpty(type) && type.equalsIgnoreCase("Transit")) {
             return driverTransit(driveremail, requestId, reqStatus);
+        } else if (StringUtils.isNotEmpty(type) && type.equalsIgnoreCase("ecommerce")) {
+            return ecommerceTaxi(driveremail, requestId, reqStatus);
         }
 
         return driverTaxi(driveremail, requestId, reqStatus);
@@ -172,6 +181,27 @@ public class DriverService {
                         transportReq.getDriveremail().equals(driveremail)) {
 
                     transitRepository.changeRequestStatus(reqStatus, requestId);
+                } else {
+                    status = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                status = HttpStatus.NOT_FOUND;
+            }
+
+            return new ResponseEntity<>(status);
+
+        }
+
+        if (StringUtils.isNotEmpty(type) && type.equalsIgnoreCase("ecommerce")) {
+            Optional<EcommerceTaxiRequest> transitRequest = ecomTaxiRequestRepository.findById(requestId);
+            EcommerceTaxiRequest transportReq = transitRequest.get();
+
+            if (StringUtils.isNotEmpty(transportReq.getDriveremail()) && reqStatus.equalsIgnoreCase("START")) {
+                if (StringUtils.isNotEmpty(otpReq) && transportReq.getOtp().equals(otpReq) &&
+                        transportReq.getRequestStatus().equals("ACK") &&
+                        transportReq.getDriveremail().equals(driveremail)) {
+
+                    ecomTaxiRequestRepository.changeRequestStatus(reqStatus, requestId);
                 } else {
                     status = HttpStatus.BAD_REQUEST;
                 }
@@ -215,8 +245,8 @@ public class DriverService {
 
         if (StringUtils.isNotEmpty(type) && type.equalsIgnoreCase("Transit")) {
 
-            Optional<TransitRequest> transitRequest = transitRepository.findById(requestId);
-            TransitRequest transitReq = transitRequest.get();
+            Optional<EcommerceTaxiRequest> transitRequest = ecomTaxiRequestRepository.findById(requestId);
+            EcommerceTaxiRequest transitReq = transitRequest.get();
 
             if (StringUtils.isNotEmpty(transitReq.getDriveremail()) &&
                     reqStatus.equalsIgnoreCase("FINISH")) {
@@ -225,6 +255,28 @@ public class DriverService {
                         transitReq.getDriveremail().equals(driveremail)) {
 
                     transitRepository.changeRequestStatus(reqStatus, requestId);
+                } else {
+                    status = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                status = HttpStatus.NOT_FOUND;
+            }
+
+            return new ResponseEntity<>(status);
+        }
+
+        if (StringUtils.isNotEmpty(type) && type.equalsIgnoreCase("ecommerce")) {
+
+            Optional<EcommerceTaxiRequest> transitRequest = ecomTaxiRequestRepository.findById(requestId);
+            EcommerceTaxiRequest transitReq = transitRequest.get();
+
+            if (StringUtils.isNotEmpty(transitReq.getDriveremail()) &&
+                    reqStatus.equalsIgnoreCase("FINISH")) {
+
+                if (transitReq.getRequestStatus().equals("START") &&
+                        transitReq.getDriveremail().equals(driveremail)) {
+
+                    ecomTaxiRequestRepository.changeRequestStatus(reqStatus, requestId);
                 } else {
                     status = HttpStatus.BAD_REQUEST;
                 }
@@ -267,10 +319,6 @@ public class DriverService {
 
             if (reqStatus.equalsIgnoreCase("ACK")) {
 
-                /*Invoice invoice = new Invoice();
-                invoice.setRequestid(requestId);
-                invoiceRepository.save(invoice);*/
-
                 //Fetch driver details to send mail to customer and admin
                 Optional<Driver> driverVal = driverRepository.findById(driveremail);
                 Driver driver = driverVal.get();
@@ -288,6 +336,45 @@ public class DriverService {
                 if (count > 0) {
                     new Thread(() -> {
                         emailToAdmin.sendEmailToAdminsAndCustomer(allAdminEmailIDs, transportRequest, driver, otp);
+                    }).start();
+                }
+            }
+        } else {
+            status = HttpStatus.NOT_FOUND;
+        }
+
+        return new ResponseEntity<>(status);
+    }
+
+    private ResponseEntity<?> ecommerceTaxi(String driveremail, Integer requestId, String reqStatus) {
+        HttpStatus status = HttpStatus.NO_CONTENT;
+
+        //fetch transport request details
+        Optional<EcommerceTaxiRequest> value = ecomTaxiRequestRepository.findById(requestId);
+        EcommerceTaxiRequest transportRequest = value.get();
+
+        //check if this request is already picked by any other driver.
+        if (StringUtils.isBlank(transportRequest.getDriveremail()) && transportRequest.getRequestStatus().equals("A")) {
+
+            if (reqStatus.equalsIgnoreCase("ACK")) {
+
+                //Fetch driver details to send mail to customer and admin
+                Optional<Driver> driverVal = driverRepository.findById(driveremail);
+                Driver driver = driverVal.get();
+
+                //fetch all admin emailids to send mail
+                List<SignUp> allAdminUsers = signUpRepository.findByUsertype("ADMIN");
+                List<String> allAdminEmailIDs = allAdminUsers.stream().map(SignUp::getEmail).collect(Collectors.toList());
+
+                Random random = new Random();
+                String otp = String.format("%04d", random.nextInt(10000));
+
+                //assign transport request to driver.
+                int count = ecomTaxiRequestRepository.changeRequestStatusAssignDriverOtp(reqStatus, driveremail, otp, requestId);
+
+                if (count > 0) {
+                    new Thread(() -> {
+                        ecommerceEmail.sendEmailToAdminsAndCustomer(allAdminEmailIDs, transportRequest, driver, otp);
                     }).start();
                 }
             }

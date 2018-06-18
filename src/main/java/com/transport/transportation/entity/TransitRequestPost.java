@@ -35,6 +35,8 @@ public class TransitRequestPost {
     @NotNull
     private double trucksize;
 
+    private double cashinhand;
+
     private double warehousecharges;
 
     public Integer getSourceId() {
@@ -135,5 +137,13 @@ public class TransitRequestPost {
 
     public Boolean getCustomclearance() {
         return customclearance;
+    }
+
+    public double getCashinhand() {
+        return cashinhand;
+    }
+
+    public void setCashinhand(double cashinhand) {
+        this.cashinhand = cashinhand;
     }
 }

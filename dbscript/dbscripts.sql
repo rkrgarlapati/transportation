@@ -4,7 +4,6 @@
 -- Server OS:                    Win64
 -- HeidiSQL Version:             9.5.0.5196
 -- --------------------------------------------------------
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!50503 SET NAMES utf8mb4 */;
@@ -31,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `companyinvoice` (
 PRIMARY KEY (`invoiceid`),
 UNIQUE KEY `requestid_UNIQUE` (`requestid`),
 CONSTRAINT `requestid` FOREIGN KEY (`requestid`) REFERENCES `transportrequest` (`requestid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 
 -- Data exporting was unselected.
 -- Dumping structure for table transport.costconfiguration
@@ -70,6 +69,45 @@ PRIMARY KEY (`email`),
 UNIQUE KEY `email_UNIQUE` (`email`),
 CONSTRAINT `Email` FOREIGN KEY (`email`) REFERENCES `signup` (`email`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Data exporting was unselected.
+-- Dumping structure for table transport.ecommerce
+CREATE TABLE IF NOT EXISTS `ecommerce` (
+`PRODUCTID` int(11) NOT NULL AUTO_INCREMENT,
+`IMAGE` blob,
+`PRODUCTNAME` varchar(300) NOT NULL,
+`DISCRIPTION` varchar(1000) DEFAULT NULL,
+`PRICE` decimal(6,2) DEFAULT NULL,
+PRIMARY KEY (`PRODUCTID`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+
+-- Data exporting was unselected.
+-- Dumping structure for table transport.ecommercetaxirequest
+CREATE TABLE IF NOT EXISTS `ecommercetaxirequest` (
+`requestid` int(11) NOT NULL AUTO_INCREMENT,
+`sourceid` int(11) DEFAULT NULL,
+`destinationid` int(11) DEFAULT NULL,
+`mobileno` varchar(13) NOT NULL,
+`datetime` datetime NOT NULL,
+`cashinhand` decimal(6,2) DEFAULT NULL,
+`requeststatus` enum('P','R','A','ACK','START','FINISH') NOT NULL,
+`email` varchar(25) NOT NULL,
+`usertype` enum('ADMIN','CUSTOMER','COMPANY','ECOMMERCE') NOT NULL,
+`productid` int(11) NOT NULL,
+`driveremail` varchar(65) DEFAULT NULL,
+`otp` varchar(4) DEFAULT NULL,
+PRIMARY KEY (`requestid`),
+KEY `sourceidtransreq_idx` (`sourceid`),
+KEY `destinationidtransreq_idx` (`destinationid`),
+KEY `emailidtransreq` (`email`),
+KEY `driveremail_idx` (`driveremail`),
+KEY `productidecommercereq_idx` (`productid`),
+CONSTRAINT `destinationidecomreq` FOREIGN KEY (`destinationid`) REFERENCES `destination` (`DESTINATIONID`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `driveremailecomreq` FOREIGN KEY (`driveremail`) REFERENCES `driver` (`email`),
+CONSTRAINT `emailidecomreq` FOREIGN KEY (`email`) REFERENCES `signup` (`email`) ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT `productidecommercereq` FOREIGN KEY (`productid`) REFERENCES `ecommerce` (`PRODUCTID`),
+CONSTRAINT `sourceidecomreq` FOREIGN KEY (`sourceid`) REFERENCES `source` (`sourceid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 -- Data exporting was unselected.
 -- Dumping structure for table transport.product
@@ -117,7 +155,7 @@ CREATE TABLE IF NOT EXISTS `transitcompanyinvoice` (
 PRIMARY KEY (`invoiceid`),
 KEY `transitrequestid_idx` (`requestid`),
 CONSTRAINT `transitrequestid` FOREIGN KEY (`requestid`) REFERENCES `transitrequest` (`requestid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 -- Data exporting was unselected.
 -- Dumping structure for table transport.transitcostconfiguration
@@ -170,6 +208,7 @@ CREATE TABLE IF NOT EXISTS `transitrequest` (
 `mobile` varchar(15) NOT NULL,
 `driveremail` varchar(65) DEFAULT NULL,
 `otp` varchar(4) DEFAULT NULL,
+`cashinhand` decimal(6,2) DEFAULT NULL,
 PRIMARY KEY (`requestid`),
 KEY `usernametransitreq` (`email`),
 KEY `sourceidtransreq_idx` (`sourceid`),
@@ -183,7 +222,7 @@ CONSTRAINT `transitproductid` FOREIGN KEY (`productid`) REFERENCES `transitprodu
 CONSTRAINT `transitservicesid` FOREIGN KEY (`serviceid`) REFERENCES `transitservices` (`SERVICEID`),
 CONSTRAINT `transitsourceid` FOREIGN KEY (`sourceid`) REFERENCES `transitsource` (`sourceid`),
 CONSTRAINT `transituserid` FOREIGN KEY (`email`) REFERENCES `signup` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
 -- Data exporting was unselected.
 -- Dumping structure for table transport.transitservices
@@ -229,7 +268,7 @@ CONSTRAINT `destinationidtransreq` FOREIGN KEY (`destinationid`) REFERENCES `des
 CONSTRAINT `driveremail` FOREIGN KEY (`driveremail`) REFERENCES `driver` (`email`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 CONSTRAINT `emailidtransreq` FOREIGN KEY (`email`) REFERENCES `signup` (`email`) ON DELETE CASCADE ON UPDATE CASCADE,
 CONSTRAINT `sourceidtransreq` FOREIGN KEY (`sourceid`) REFERENCES `source` (`sourceid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
 
 -- Data exporting was unselected.
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

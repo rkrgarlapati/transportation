@@ -22,23 +22,76 @@ public class CommonUtil {
         return dest;
     }
 
-    public RideHistory getCustomerHistory(TransportRequest transReq) {
-        RideHistory dest = new RideHistory();
+    public EcomRequestCustom copyEcomRequest(EcommerceTaxiRequest transReq) {
+        EcomRequestCustom dest = new EcomRequestCustom();
 
         BeanUtils.copyProperties(transReq, dest);
 
-        dest.setDestination(transReq.getDest().getDestinationname());
-        dest.setSource(transReq.getSour().getSourcename());
+        if (transReq.getDest() != null) {
+            dest.setDestination(transReq.getDest().getDestinationname());
+        }
+        if (transReq.getSour() != null) {
+            dest.setSource(transReq.getSour().getSourcename());
+        }
+
+        Ecommerce ecommerce = transReq.getEcommerce();
+        dest.setProductid(ecommerce.getProductid());
+        dest.setProductname(ecommerce.getProductname());
+        dest.setProductprice(ecommerce.getPrice());
+
+
+
+        SignUp user = transReq.getUser();
 
         return dest;
     }
-    public RideHistory getCustomerHistory(TransitRequest transReq) {
+
+    public RideHistory getCustomerHistory(TransportRequest transReq, String type) {
         RideHistory dest = new RideHistory();
 
         BeanUtils.copyProperties(transReq, dest);
 
         dest.setDestination(transReq.getDest().getDestinationname());
         dest.setSource(transReq.getSour().getSourcename());
+        dest.setTraveltype(type);
+
+        return dest;
+    }
+
+    public RideHistory getCustomerHistory(TransitRequest transReq, String type) {
+        RideHistory dest = new RideHistory();
+
+        BeanUtils.copyProperties(transReq, dest);
+
+        dest.setRequestid(transReq.getRequestId());
+        dest.setDestination(transReq.getDest().getDestinationname());
+        dest.setSource(transReq.getSour().getSourcename());
+        dest.setTraveltype(type);
+
+        return dest;
+    }
+
+    public RideHistory getCustomerHistory(EcommerceTaxiRequest transReq, String type) {
+        RideHistory dest = new RideHistory();
+
+        BeanUtils.copyProperties(transReq, dest);
+
+        dest.setRequestid(transReq.getRequestid());
+
+        if (transReq.getDest() != null) {
+            dest.setDestination(transReq.getDest().getDestinationname());
+        }
+
+        if (transReq.getSour() != null) {
+            dest.setSource(transReq.getSour().getSourcename());
+        }
+
+        Ecommerce ecommerce = transReq.getEcommerce();
+        dest.setProductid(ecommerce.getProductid());
+        dest.setProductname(ecommerce.getProductname());
+        dest.setProductprice(ecommerce.getPrice());
+
+        dest.setTraveltype(type);
 
         return dest;
     }
