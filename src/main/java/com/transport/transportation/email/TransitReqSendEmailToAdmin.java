@@ -2,13 +2,22 @@ package com.transport.transportation.email;
 
 import com.transport.transportation.entity.Driver;
 import com.transport.transportation.entity.SignUp;
+import com.transport.transportation.entity.TransitCustomsDocsName;
 import com.transport.transportation.entity.TransitRequest;
 import org.apache.tomcat.util.buf.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -123,5 +132,43 @@ public class TransitReqSendEmailToAdmin {
                 });
 
         return session;
+    }
+
+
+    public void sendMailToCustomerAndAdminCustClearance(List<String> allAdminEmailIDs, TransitCustomsDocsName docs) {
+        try {
+
+            Message message = new MimeMessage(getMailSession());
+            message.setRecipients(Message.RecipientType.TO,
+                    InternetAddress.parse(StringUtils.join(allAdminEmailIDs, ',')));
+            message.setSubject("Custom Clearance Successful. Request # " + docs.getRequestid());
+            //message.setText("Please find the attached custom clearance document.");
+
+            Multipart multipart = new MimeMultipart();
+            BodyPart messageBodyPart = new MimeBodyPart();
+
+            String filepath = System.getProperty("java.io.tmpdir")+docs.getFilename();
+
+            try (FileOutputStream fos = new FileOutputStream(filepath)) {
+                fos.write(docs.getDocument());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            DataSource source = new FileDataSource(filepath);
+            messageBodyPart.setDataHandler(new DataHandler(source));
+            messageBodyPart.setFileName(filepath);
+
+            multipart.addBodyPart(messageBodyPart);
+            message.setContent(multipart);
+            Transport.send(message);
+
+            System.out.println("Custom Clearance document Mail Sent");
+
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

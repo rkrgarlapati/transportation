@@ -3,6 +3,7 @@ package com.transport.transportation.services;
 import com.transport.transportation.common.CommonUtil;
 import com.transport.transportation.csv.GenerateCSV;
 import com.transport.transportation.dto.SendTransportDocument;
+import com.transport.transportation.dto.RequestIdStatus;
 import com.transport.transportation.email.TransportReqSendEmailToAdmin;
 import com.transport.transportation.entity.*;
 import com.transport.transportation.repository.*;
@@ -113,23 +114,22 @@ public class TaxiService {
         return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 
-    @PatchMapping("/{requestId}/{reqStatus}")
+    @PutMapping
     @Transactional
-    public ResponseEntity<?> approveRequest(@PathVariable Integer requestId,
-                                            @PathVariable String reqStatus) {
+    public ResponseEntity<?> approveRequest(@RequestBody RequestIdStatus appReq) {
 
         HttpStatus status;
 
-        int count = transReqRepository.changeRequestStatus(reqStatus, requestId);
+        int count = transReqRepository.changeRequestStatus(appReq.getReqStatus(), appReq.getRequestId());
 
         if (count > 0) {
-            if (reqStatus.equalsIgnoreCase("A")) {
+            if (appReq.getReqStatus().equalsIgnoreCase("A")) {
                 Invoice invoice = new Invoice();
-                invoice.setRequestid(requestId);
+                invoice.setRequestid(appReq.getRequestId());
 
                 invoiceRepository.save(invoice);
 
-                Optional<TransportRequest> value = transReqRepository.findById(requestId);
+                Optional<TransportRequest> value = transReqRepository.findById(appReq.getRequestId());
 
                 TransportRequest transportRequest = value.get();
 

@@ -87,6 +87,17 @@ public class EcommerceTaxiRequest {
     @JsonIgnore
     private String otp;
 
+    @Column(name = "remarks")
+    private String remarks;
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
     public String getDriveremail() {
         return driveremail;
     }

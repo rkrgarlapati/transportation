@@ -39,11 +39,11 @@ public class DriverAndUserRideHistory {
         SignUp user = new SignUp();
         user.setEmail(emailid);
 
-        Iterable<TransportRequest> allrequests = transReqRepository.findAllByUser(user);
+        Iterable<TransportRequest> allTaxirequests = transReqRepository.findAllByUser(user);
         Iterable<TransitRequest> allTransitrequests = transitRepository.findAllByUser(user);
         Iterable<EcommerceTaxiRequest> ecommerceTaxiRequests = ecomTaxiRequestRepository.findAllByUser(user);
 
-        List<RideHistory> allReq = setValues(allrequests, allTransitrequests, ecommerceTaxiRequests);
+        List<RideHistory> allReq = setValues(allTaxirequests, allTransitrequests, ecommerceTaxiRequests);
 
         return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
@@ -72,14 +72,24 @@ public class DriverAndUserRideHistory {
     @GetMapping("/user/rides/{reqstatus}")
     public ResponseEntity<?> getAllRidesOnStatus(@PathVariable String reqstatus) {
 
-        Iterable<TransportRequest> allrequests =
-                transReqRepository.findAllByRequestStatus(reqstatus);
 
-        Iterable<TransitRequest> allTransitrequests =
-                transitRepository.findAllByRequestStatus(reqstatus);
+        Iterable<TransportRequest> allrequests = new ArrayList<>();
+        Iterable<TransitRequest> allTransitrequests = new ArrayList<>();
+        Iterable<EcommerceTaxiRequest> ecommerceTaxiRequests = new ArrayList<>();
 
-        Iterable<EcommerceTaxiRequest> ecommerceTaxiRequests =
-                ecomTaxiRequestRepository.findAllByRequestStatus(reqstatus);
+        if(!reqstatus.equalsIgnoreCase("A")) {
+            allrequests = transReqRepository.findAllByRequestStatus(reqstatus);
+            allTransitrequests = transitRepository.findAllByRequestStatus(reqstatus);
+            ecommerceTaxiRequests = ecomTaxiRequestRepository.findAllByRequestStatus(reqstatus);
+        } else {
+            List<String> reqStatusParam = new ArrayList<>();
+            reqStatusParam.add("P");
+            reqStatusParam.add("R");
+
+            allrequests = transReqRepository.findAllByRequestStatusNotIn(reqStatusParam);
+            allTransitrequests = transitRepository.findAllByRequestStatusNotIn(reqStatusParam);
+            ecommerceTaxiRequests = ecomTaxiRequestRepository.findAllByRequestStatusNotIn(reqStatusParam);
+        }
 
         List<RideHistory> allReq = setValues(allrequests, allTransitrequests, ecommerceTaxiRequests);
 

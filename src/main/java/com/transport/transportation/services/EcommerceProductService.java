@@ -1,19 +1,28 @@
 package com.transport.transportation.services;
 
 import com.transport.transportation.entity.Ecommerce;
+import com.transport.transportation.entity.EcommerceImageUrls;
 import com.transport.transportation.entity.EcommerceName;
+import com.transport.transportation.entity.TransitCustomDocs;
 import com.transport.transportation.repository.EcommerceRepository;
+import com.transport.transportation.repository.EcommerceRepositoryImageUrls;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/ecommerce")
 public class EcommerceProductService {
+
+
     private EcommerceRepository ecommerceRepository;
+
+    @Autowired
+    private EcommerceRepositoryImageUrls ecomRepImageUrls;
 
     @Autowired
     public EcommerceProductService(EcommerceRepository ecommerceRepository) {
@@ -57,10 +66,10 @@ public class EcommerceProductService {
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Ecommerce>> getAll() {
+    public ResponseEntity<Iterable<EcommerceImageUrls>> getAll() {
         HttpStatus status;
 
-        Iterable<Ecommerce> all = ecommerceRepository.findAll();
+        Iterable<EcommerceImageUrls> all = ecomRepImageUrls.findAll();
 
         if (all.spliterator().getExactSizeIfKnown() > 0) {
             status = HttpStatus.OK;

@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public interface TaxiRequestRepository extends CrudRepository<TransportRequest, Integer> {
@@ -32,6 +33,7 @@ public interface TaxiRequestRepository extends CrudRepository<TransportRequest, 
     Iterable<TransportRequest> findAllByUserTypeAndDateTimeBetween(String usertype, Date fromdate, Date todate);
 
     Iterable<TransportRequest> findAllByRequestStatus(String requeststatus);
+    Iterable<TransportRequest> findAllByRequestStatusNotIn(List<String> requeststatus);
 
     Iterable<TransportRequest> findAllByUser(SignUp email);
 

@@ -134,7 +134,7 @@ public class UserService {
     }
 
 
-    @PatchMapping("/changepassword")
+    @PutMapping("/changepassword")
     public ResponseEntity<?> changePassword(@RequestBody ChangePassword changePassword) {
 
         HttpStatus status;

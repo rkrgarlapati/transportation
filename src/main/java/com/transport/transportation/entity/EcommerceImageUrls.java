@@ -1,38 +1,29 @@
 package com.transport.transportation.entity;
 
 import javax.persistence.Column;
-import javax.persistence.Lob;
-import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-@MappedSuperclass
-public class EcommerceName {
+@Entity
+@Table(name = "ECOMMERCE")
+public class EcommerceImageUrls {
 
-    @Lob
-    @Column(name="IMAGE")
-    private byte[] image;
+    @Id
+    @Column(name = "PRODUCTID")
+    private Integer productid;
 
-    @NotNull
     @Column(name = "PRODUCTNAME")
     private String productname;
 
-    @NotNull
     @Column(name = "DISCRIPTION")
     private String discription;
 
-    @NotNull
     @Column(name = "PRICE")
     private Float price;
 
     private String imageurl;
 
-    public String getImageurl() {
-        return imageurl;
-    }
-
-    public void setImageurl(String imageurl) {
-        this.imageurl = imageurl;
-    }
 
     public String getProductname() {
         return productname;
@@ -58,11 +49,19 @@ public class EcommerceName {
         this.price = price;
     }
 
-    public byte[] getImage() {
-        return image;
+    public String getImageurl() {
+        return imageurl;
     }
 
-    public void setImage(byte[] image) {
-        this.image = image;
+    public void setImageurl(String imageurl) {
+        this.imageurl = imageurl;
+    }
+
+    public Integer getProductid() {
+        return productid;
+    }
+
+    public void setProductid(Integer productid) {
+        this.productid = productid;
     }
 }

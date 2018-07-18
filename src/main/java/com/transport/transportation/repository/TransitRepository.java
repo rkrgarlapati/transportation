@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 public interface TransitRepository extends CrudRepository<TransitRequest, Integer> {
 
@@ -26,6 +27,7 @@ public interface TransitRepository extends CrudRepository<TransitRequest, Intege
     int changeRequestStatusAssignDriverOtp(String requeststatus, String driveremail, String otp, Integer requestid);
 
     Iterable<TransitRequest> findAllByRequestStatus(String requestStatus);
+    Iterable<TransitRequest> findAllByRequestStatusNotIn(List<String> requeststatus);
 
     Iterable<TransitRequest> findAllByUser(SignUp email);
 

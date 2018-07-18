@@ -13,12 +13,36 @@ public class RideHistory {
     private String mobileNo;
     private double cost;
     private String traveltype;
+    private String requestStatus;
+    private Integer destinationId;
+    private Integer sourceId;
+    private Integer productId;
+    private Integer serviceId;
 
     private String productname;
     private Float productprice;
     private Integer productid;
 
-   public int getRequestid() {
+    private Boolean customclear;
+    private String email;
+
+    public Boolean getCustomclear() {
+        return customclear;
+    }
+
+    public void setCustomclear(Boolean customclear) {
+        this.customclear = customclear;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public int getRequestid() {
         return requestid;
     }
 
@@ -96,5 +120,45 @@ public class RideHistory {
 
     public void setProductid(Integer productid) {
         this.productid = productid;
+    }
+
+    public String getRequestStatus() {
+        return requestStatus;
+    }
+
+    public void setRequestStatus(String requestStatus) {
+        this.requestStatus = requestStatus;
+    }
+
+    public Integer getDestinationId() {
+        return destinationId;
+    }
+
+    public void setDestinationId(Integer destinationId) {
+        this.destinationId = destinationId;
+    }
+
+    public Integer getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Integer sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public Integer getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Integer productId) {
+        this.productId = productId;
+    }
+
+    public Integer getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(Integer serviceId) {
+        this.serviceId = serviceId;
     }
 }

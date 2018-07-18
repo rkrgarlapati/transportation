@@ -2,8 +2,8 @@ package com.transport.transportation.services;
 
 import com.transport.transportation.common.CommonUtil;
 import com.transport.transportation.csv.GenerateCSV;
+import com.transport.transportation.dto.RequestIdStatus;
 import com.transport.transportation.email.EcommerceReqSendEmailToAdmin;
-import com.transport.transportation.email.TransportReqSendEmailToAdmin;
 import com.transport.transportation.entity.*;
 import com.transport.transportation.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +90,7 @@ public class EcommerceTaxiService {
         Ecommerce ecommerce = new Ecommerce();
         ecommerce.setProductid(ecommerceRequestPost.getProductid());
         ecomtransReq.setEcommerce(ecommerce);
+        ecomtransReq.setRemarks(ecommerceRequestPost.getRemarks());
 
         EcommerceTaxiRequest inserted = ecomTaxiRequestRepository.save(ecomtransReq);
 
@@ -122,19 +123,18 @@ public class EcommerceTaxiService {
         return new ResponseEntity<>(allReq, HttpStatus.OK);
     }
 
-    @PatchMapping("/{requestId}/{reqStatus}")
+    @PutMapping
     @Transactional
-    public ResponseEntity<?> approveRequest(@PathVariable Integer requestId,
-                                            @PathVariable String reqStatus) {
+    public ResponseEntity<?> approveRequest(@RequestBody RequestIdStatus appReq) {
 
         HttpStatus status;
 
-        int count = ecomTaxiRequestRepository.changeRequestStatus(reqStatus, requestId);
+        int count = ecomTaxiRequestRepository.changeRequestStatus(appReq.getReqStatus(), appReq.getRequestId());
 
         if (count > 0) {
-            if (reqStatus.equalsIgnoreCase("A")) {
+            if (appReq.getReqStatus().equalsIgnoreCase("A")) {
 
-                Optional<EcommerceTaxiRequest> value = ecomTaxiRequestRepository.findById(requestId);
+                Optional<EcommerceTaxiRequest> value = ecomTaxiRequestRepository.findById(appReq.getRequestId());
 
                 EcommerceTaxiRequest transportRequest = value.get();
 

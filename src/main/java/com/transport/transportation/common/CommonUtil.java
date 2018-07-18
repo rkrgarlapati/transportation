@@ -40,7 +40,6 @@ public class CommonUtil {
         dest.setProductprice(ecommerce.getPrice());
 
 
-
         SignUp user = transReq.getUser();
 
         return dest;
@@ -51,9 +50,15 @@ public class CommonUtil {
 
         BeanUtils.copyProperties(transReq, dest);
 
+        dest.setDestinationId(transReq.getDest().getDestinationid());
         dest.setDestination(transReq.getDest().getDestinationname());
+
+        dest.setSourceId(transReq.getSour().getSourceid());
         dest.setSource(transReq.getSour().getSourcename());
+
         dest.setTraveltype(type);
+
+        dest.setEmail(transReq.getUser().getEmail());
 
         return dest;
     }
@@ -64,9 +69,24 @@ public class CommonUtil {
         BeanUtils.copyProperties(transReq, dest);
 
         dest.setRequestid(transReq.getRequestId());
+
+        dest.setDestinationId(transReq.getDest().getDestinationid());
         dest.setDestination(transReq.getDest().getDestinationname());
+
+        dest.setSourceId(transReq.getSour().getSourceid());
         dest.setSource(transReq.getSour().getSourcename());
+
+        if (transReq.getProd() != null) {
+            dest.setProductid(transReq.getProd().getProductid());
+        }
+
+        if (transReq.getServi() != null) {
+            dest.setServiceId(transReq.getServi().getServiceid());
+        }
+
         dest.setTraveltype(type);
+
+        dest.setEmail(transReq.getUser().getEmail());
 
         return dest;
     }
@@ -80,10 +100,12 @@ public class CommonUtil {
 
         if (transReq.getDest() != null) {
             dest.setDestination(transReq.getDest().getDestinationname());
+            dest.setDestinationId(transReq.getDest().getDestinationid());
         }
 
         if (transReq.getSour() != null) {
             dest.setSource(transReq.getSour().getSourcename());
+            dest.setSourceId(transReq.getSour().getSourceid());
         }
 
         Ecommerce ecommerce = transReq.getEcommerce();
@@ -92,6 +114,8 @@ public class CommonUtil {
         dest.setProductprice(ecommerce.getPrice());
 
         dest.setTraveltype(type);
+
+        dest.setEmail(transReq.getUser().getEmail());
 
         return dest;
     }

@@ -28,6 +28,16 @@ public class EcommerceRequestPost {
 
     private Float cashInHand;
 
+    private String remarks;
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
     public Integer getSourceId() {
         return sourceId;
     }

@@ -1,6 +1,8 @@
 package com.transport.transportation.services;
 
 import com.transport.transportation.common.CommonUtil;
+import com.transport.transportation.dto.RequestIdStatus;
+import com.transport.transportation.dto.WareHouseCharges;
 import com.transport.transportation.email.TransitReqSendEmailToAdmin;
 import com.transport.transportation.entity.*;
 import com.transport.transportation.repository.*;
@@ -122,23 +124,22 @@ public class TransitService {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{requestId}/{reqStatus}")
+    @PutMapping
     @Transactional
-    public ResponseEntity<?> approveRequest(@PathVariable Integer requestId,
-                                            @PathVariable String reqStatus) {
+    public ResponseEntity<?> approveRequest(@RequestBody RequestIdStatus appReq) {
 
         HttpStatus status;
 
-        int count = transitRepository.changeRequestStatus(reqStatus, requestId);
+        int count = transitRepository.changeRequestStatus(appReq.getReqStatus(), appReq.getRequestId());
 
         if (count > 0) {
-            if (reqStatus.equalsIgnoreCase("A")) {
+            if (appReq.getReqStatus().equalsIgnoreCase("A")) {
                 TransitInvoice invoice = new TransitInvoice();
-                invoice.setRequestid(requestId);
+                invoice.setRequestid(appReq.getRequestId());
 
                 invoiceRepository.save(invoice);
 
-                Optional<TransitRequest> value = transitRepository.findById(requestId);
+                Optional<TransitRequest> value = transitRepository.findById(appReq.getRequestId());
                 TransitRequest transitRequest = value.get();
 
                 List<Driver> allDrivers = driverRepository.findByStatus("UNBLOCK");
@@ -156,15 +157,15 @@ public class TransitService {
         return new ResponseEntity<>(status);
     }
 
-    @PatchMapping("/{requestId}/warehouse/{warehousecharges}")
-    public ResponseEntity<?> updateWarehousecharges(@PathVariable Integer requestId,
-                                                    @PathVariable Double warehousecharges) {
+    @PutMapping("/warehouse")
+    public ResponseEntity<?> updateWarehousecharges(@RequestBody WareHouseCharges warCharges) {
 
         HttpStatus status;
         int count = 0;
 
-        if (warehousecharges != null && warehousecharges > 0) {
-            count = transitRepository.changeWarehousecharges(warehousecharges, requestId);
+        if (warCharges.getRequestId() != null && warCharges.getWarehousecharges() > 0) {
+            count = transitRepository.changeWarehousecharges(warCharges.getWarehousecharges(),
+                    warCharges.getRequestId());
         }
 
         if (count > 0) {
@@ -230,7 +231,7 @@ public class TransitService {
         dest.setSource(transReq.getSour().getSourcename());
         dest.setSourceId(null);
         dest.setDestinationId(null);
-        if(transReq.getCashinhand() != null) {
+        if (transReq.getCashinhand() != null) {
             dest.setCashinhand(transReq.getCashinhand());
         }
         /*User user = transReq.getUser();

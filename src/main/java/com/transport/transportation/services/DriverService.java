@@ -1,6 +1,7 @@
 package com.transport.transportation.services;
 
 import com.transport.transportation.dto.DriverBlockUnblock;
+import com.transport.transportation.dto.DriverEmailAndRequestID;
 import com.transport.transportation.dto.DrivingFinish;
 import com.transport.transportation.dto.DrivingStart;
 import com.transport.transportation.email.EcommerceReqSendEmailToAdmin;
@@ -25,8 +26,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/driver")
 public class DriverService {
-
-    private DriverRepository driverRepository;
 
     @Autowired
     private TransitReqSendEmailToAdmin transitReqSendEmailToAdmin;
@@ -53,12 +52,10 @@ public class DriverService {
     private InvoiceRepository invoiceRepository;
 
     @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
     @Autowired
-    public DriverService(DriverRepository driverRepository) {
-        this.driverRepository = driverRepository;
-    }
+    DriverRepository driverRepository;
 
     @PostMapping
     public ResponseEntity<?> add(@RequestBody Driver driver) {
@@ -97,7 +94,7 @@ public class DriverService {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping
+    @PutMapping("/driverBlockUnblock")
     public ResponseEntity<?> driverBlockUnblock(@RequestBody DriverBlockUnblock driverBlockUnblock) {
 
         driverRepository.updateStatus(driverBlockUnblock.getStatus(), driverBlockUnblock.getEmail());
@@ -143,19 +140,18 @@ public class DriverService {
         }
     }
 
-    @PatchMapping("/{driveremail}/{requestId}/{reqStatus}")
+    @PutMapping("/accept")
     @Transactional
-    public ResponseEntity<?> acceptRide(@PathVariable String driveremail, @PathVariable Integer requestId,
-                                        @PathVariable String reqStatus,
+    public ResponseEntity<?> acceptRide(@RequestBody DriverEmailAndRequestID req,
                                         @RequestParam(name = "type", required = false) String type) {
 
         if (StringUtils.isNotEmpty(type) && type.equalsIgnoreCase("Transit")) {
-            return driverTransit(driveremail, requestId, reqStatus);
+            return driverTransit(req.getDriveremail(), req.getRequestId(), req.getReqStatus());
         } else if (StringUtils.isNotEmpty(type) && type.equalsIgnoreCase("ecommerce")) {
-            return ecommerceTaxi(driveremail, requestId, reqStatus);
+            return ecommerceTaxi(req.getDriveremail(), req.getRequestId(), req.getReqStatus());
         }
 
-        return driverTaxi(driveremail, requestId, reqStatus);
+        return driverTaxi(req.getDriveremail(), req.getRequestId(), req.getReqStatus());
     }
 
     @PostMapping("/start")
@@ -245,8 +241,8 @@ public class DriverService {
 
         if (StringUtils.isNotEmpty(type) && type.equalsIgnoreCase("Transit")) {
 
-            Optional<EcommerceTaxiRequest> transitRequest = ecomTaxiRequestRepository.findById(requestId);
-            EcommerceTaxiRequest transitReq = transitRequest.get();
+            Optional<TransitRequest> transitRequest = transitRepository.findById(requestId);
+            TransitRequest transitReq = transitRequest.get();
 
             if (StringUtils.isNotEmpty(transitReq.getDriveremail()) &&
                     reqStatus.equalsIgnoreCase("FINISH")) {
@@ -427,5 +423,8 @@ public class DriverService {
 
         return new ResponseEntity<>(status);
     }
+
+
+
 
 }
