@@ -106,11 +106,6 @@ public class UserService {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginUser loginUser) {
 
-        for(long i =0; i <= 20000000; i++) {
-
-            LOG.info("Login credentials: {}", loginUser);
-        }
-
         HttpStatus status = HttpStatus.OK;
 
         SignUp user = signUpRepository.findByEmailAndPassword(
