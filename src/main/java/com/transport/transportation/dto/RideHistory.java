@@ -26,6 +26,16 @@ public class RideHistory {
     private Boolean customclear;
     private String email;
 
+    private double warehousecharges;
+
+    public double getWarehousecharges() {
+        return warehousecharges;
+    }
+
+    public void setWarehousecharges(double warehousecharges) {
+        this.warehousecharges = warehousecharges;
+    }
+
     public Boolean getCustomclear() {
         return customclear;
     }

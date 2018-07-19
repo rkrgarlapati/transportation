@@ -9,6 +9,8 @@ import com.transport.transportation.repository.CompanyAddressRepository;
 import com.transport.transportation.repository.SignUpRepository;
 import com.transport.transportation.email.ForgotPasswordSendEmail;
 import com.transport.transportation.email.SignUpSendEmail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,8 @@ import java.util.Random;
 @RestController
 @RequestMapping("/user")
 public class UserService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
     private CompanyAddressRepository addressRepository;
 
@@ -62,6 +66,8 @@ public class UserService {
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody SignUp sign) {
 
+        System.out.println("*** SignUp data *** :"+sign);
+
         HttpStatus status = HttpStatus.CREATED;
 
         Optional<SignUp> verifyDB = signUpRepository.findById(sign.getEmail());
@@ -99,6 +105,11 @@ public class UserService {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginUser loginUser) {
+
+        for(long i =0; i <= 20000000; i++) {
+
+            LOG.info("Login credentials: {}", loginUser);
+        }
 
         HttpStatus status = HttpStatus.OK;
 

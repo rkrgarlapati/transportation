@@ -93,6 +93,7 @@ public class TransitRequest {
     private Boolean customclear;
 
     private double warehousecharges;
+
     @Column(name = "driveremail")
     private String driveremail;
 

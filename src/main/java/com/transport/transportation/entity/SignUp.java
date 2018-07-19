@@ -69,4 +69,15 @@ public class SignUp {
     public void setCompanyname(String companyname) {
         this.companyname = companyname;
     }
+
+    @Override
+    public String toString() {
+        return "SignUp{" +
+                "email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", usertype='" + usertype + '\'' +
+                ", companyname='" + companyname + '\'' +
+                '}';
+    }
 }
